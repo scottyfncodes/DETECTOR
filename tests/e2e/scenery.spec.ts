@@ -9,9 +9,9 @@ import { expect, test } from '@playwright/test';
  */
 test('a field scenery clue is found by looking, not digging', async ({ page }) => {
   await page.addInitScript(() => {
-    if (localStorage.getItem('unearth.save.v1')) return;
+    if (localStorage.getItem('detector.save.v1')) return;
     localStorage.setItem(
-      'unearth.save.v1',
+      'detector.save.v1',
       JSON.stringify({
         version: 1,
         createdAt: 1,
@@ -33,6 +33,7 @@ test('a field scenery clue is found by looking, not digging', async ({ page }) =
           targets: [{ uid: 'filler', targetId: 'tgt_bottle_cap', x: 1300, y: 100, depth: 8, baseCondition: 80, dug: false }],
           playerX: 1150,
           playerY: 1380,
+          playerYaw: 0,
           holes: [],
           startedAt: 1,
         },
@@ -46,7 +47,7 @@ test('a field scenery clue is found by looking, not digging', async ({ page }) =
     );
   });
 
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
   await page.getByTestId('location-loc_old_park').click();
   await page.getByTestId('explore-canvas').waitFor();
 

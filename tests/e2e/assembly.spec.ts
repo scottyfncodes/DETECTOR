@@ -47,11 +47,11 @@ const SEEDED_SAVE = {
 test.describe('assembling The Bound Tablet', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((save) => {
-      if (!localStorage.getItem('unearth.save.v1')) {
-        localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+      if (!localStorage.getItem('detector.save.v1')) {
+        localStorage.setItem('detector.save.v1', JSON.stringify(save));
       }
     }, SEEDED_SAVE);
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
   });
 
   test('shows the "these belong together" moment, assembles, and unlocks the courtyard', async ({
@@ -123,11 +123,11 @@ test.describe('the overgrown courtyard', () => {
       assembled: ['tgt_bound_tablet'],
     };
     await page.addInitScript((save) => {
-      if (!localStorage.getItem('unearth.save.v1')) {
-        localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+      if (!localStorage.getItem('detector.save.v1')) {
+        localStorage.setItem('detector.save.v1', JSON.stringify(save));
       }
     }, unlockedSave);
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
   });
 
   test('a puzzle-only adventure: no mechanism, no escape, straight to the reward', async ({

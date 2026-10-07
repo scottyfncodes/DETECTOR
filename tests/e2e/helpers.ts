@@ -204,7 +204,7 @@ export async function scrubPit(page: Page, rows = 7, passes = 1): Promise<void> 
 }
 
 export async function startNewGame(page: Page): Promise<void> {
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.getByRole('button', { name: /begin/i }).click();

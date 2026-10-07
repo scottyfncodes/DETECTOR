@@ -49,6 +49,8 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_shard_b', weight: 2.2 },
       { targetId: 'tgt_shard_c', weight: 1.6 },
     ],
+    // The pond path leading out under a lone tree, the park opening beyond.
+    arrivalBearing: 215,
     map: { x: 0.3, y: 0.68 },
     sceneryClues: [
       {
@@ -108,8 +110,8 @@ export const LOCATIONS: LocationDef[] = [
       },
     ],
     caches: [
-      // Bearing 312° from the dedication stone, eight metres on — exactly
-      // where the surveyor's first page says to look.
+      // Two lines cross here: bearing 312° from the dedication stone (which
+      // runs straight at the dead oak), and the lamp on the path due south.
       { id: 'cache_park_tin', targetId: 'tgt_survey_tin', x: 556, y: 565, depthCm: 16, baseCondition: 74, requiresClue: 'clue_surveyor_1' },
     ],
   },
@@ -159,6 +161,8 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_shard_b', weight: 1.8 },
       { targetId: 'tgt_shard_c', weight: 2.4 },
     ],
+    // A pine over the rails, the water tower's legs at the edge of frame.
+    arrivalBearing: 345,
     map: { x: 0.62, y: 0.8 },
     sceneryClues: [
       {
@@ -225,8 +229,9 @@ export const LOCATIONS: LocationDef[] = [
       { id: 'rail_boulder', kind: 'boulder', x: 300, y: 650, scale: 1.1 },
     ],
     caches: [
-      // Bearing 225° from the buffer stop, twelve paces: the second page.
-      { id: 'cache_rail_plumb', targetId: 'tgt_plumb_bob', x: 701, y: 979, depthCm: 19, baseCondition: 80, requiresClue: 'clue_surveyor_2' },
+      // Bearing 225° from the buffer stop (brushing the signal box), crossed
+      // by the water tower standing exactly north-west: the second page.
+      { id: 'cache_rail_plumb', targetId: 'tgt_plumb_bob', x: 840, y: 840, depthCm: 19, baseCondition: 80, requiresClue: 'clue_surveyor_2' },
     ],
   },
   {
@@ -271,6 +276,8 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_mechanism_part', weight: 2 },
       { targetId: 'tgt_unknown_artifact', weight: 1.4 },
     ],
+    // The tunnel support's gallows frame against the dusk, spoil underfoot.
+    arrivalBearing: 215,
     map: { x: 0.72, y: 0.3 },
     sceneryClues: [
       {
@@ -320,8 +327,9 @@ export const LOCATIONS: LocationDef[] = [
       { id: 'mine_pine', kind: 'pine', x: 1420, y: 300, scale: 0.8 },
     ],
     caches: [
-      // Bearing 290° from the headframe, inside the pocket in the rock.
-      { id: 'cache_mine_book', targetId: 'tgt_field_book', x: 343, y: 294, depthCm: 24, baseCondition: 70, requiresClue: 'clue_surveyor_3' },
+      // Bearing 290° from the headframe, inside the pocket in the rock, where
+      // the big spoil heap stands due south through the pocket's mouth.
+      { id: 'cache_mine_book', targetId: 'tgt_field_book', x: 300, y: 278, depthCm: 24, baseCondition: 70, requiresClue: 'clue_surveyor_3' },
     ],
   },
   {

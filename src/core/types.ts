@@ -146,6 +146,12 @@ export interface LocationDef {
    * at it — the ground has not changed, but what the player knows has.
    */
   caches?: CacheDef[];
+  /**
+   * The compass bearing a fresh arrival faces. The first frame of a place is
+   * composed — a silhouette, a line leading into depth — not whichever fence
+   * happens to lie due north.
+   */
+  arrivalBearing?: number;
   /** Where this place sits on the survey map, 0..1 across the sheet. */
   map: { x: number; y: number };
 }
@@ -260,6 +266,12 @@ export interface ClueDef {
    * survey map draws what is known: a pencil line toward it, and where.
    */
   pointsTo?: string;
+  /**
+   * A place this clue opens by itself, the moment it is read. Reserved for a
+   * page that sends the player somewhere specific: knowing exactly where to
+   * stand is reason enough to go, without waiting on a lucky dig elsewhere.
+   */
+  opens?: string;
 }
 
 export interface MysteryChain {
@@ -336,6 +348,8 @@ export interface FieldState {
   /** Player position in centimetres, persisted so a refresh resumes in place. */
   playerX: number;
   playerY: number;
+  /** Facing (yaw, radians) when last saved, so a return from a dig faces the same way. */
+  playerYaw?: number;
   /** Holes already dug, so the ground remembers where you've been. */
   holes: { x: number; y: number; found: boolean }[];
   startedAt: number;

@@ -1,6 +1,8 @@
-# UNEARTH
+# DETECTOR
 
-A mobile-first archaeological adventure, played entirely in first person. You
+A first-person field-discovery game about noticing things, learning how they
+connect, and using that knowledge to uncover what was previously invisible.
+Played entirely in first person, mobile-first. You
 walk real ground under a real sky, sweep a metal detector, dig carefully, and
 find out what has been down there — or notice it lying in plain sight without
 digging at all. Most of what comes up is rubbish. Occasionally it is the
@@ -10,8 +12,12 @@ page in someone else's handwriting that names a landmark and a bearing, and
 ground you had already searched clean turning out to hold exactly what the
 page said.
 
-**Play it: https://scottyfncodes.github.io/UNEARTH/** — best on a phone, with
+**Play it: https://scottyfncodes.github.io/DETECTOR/** — best on a phone, with
 sound on.
+
+DETECTOR grew out of the first-person build of UNEARTH and is now its
+permanent home. (The UNEARTH repository and site are a different game — a
+top-down kitten adventure — and are untouched by this one.)
 
 ```
 EXPLORE → NOTICE SOMETHING STRANGE → INVESTIGATE → DISCOVER A CLUE
@@ -61,11 +67,17 @@ it changes what the player can *read*. Every bearing already written in the
 journal ("Bearing 312°" on the survey tag, scratched into the plaque on the
 bench) becomes a direction you can face: a heading strip appears at the top
 of the world while you carry it. The field book is the game's long thread.
-Each page names a landmark and a bearing; the ground at that bearing holds
-the next page, buried, and findable only with the detector. The pages lead
+Each page is a cross-bearing, the way a surveyor would actually fix a spot:
+one line from a named landmark at a written bearing — which always runs
+*at* something you can see, the dead oak, the signal box, the rock — and one
+sightline to a second landmark on a labelled point of the compass ("where
+the lamp on the path stands due south of you"). Where the two cross, the
+next page is buried, findable only with the detector. There are no pace
+counts: the player has to stand in the world and look. The pages lead
 from the court to the park to the railway to a pocket in the rock behind the
 mine's spoil heap that you can see from the headframe but cannot walk to in a
-straight line — and the last page ends at the adit, where the three-pointed
+straight line (the third page opens the mine ground by itself: knowing exactly
+where to stand is reason enough to go) — and the last page ends at the adit, where the three-pointed
 sun was already pointing. The surveyor was chasing the same thing you are.
 You are not the first. You may be the second.
 
@@ -76,7 +88,10 @@ place already searched clean becomes worth walking again the moment a page
 names it, and the map says so in words rather than numbers.
 
 Deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on every push
-to the active branch; the unit suite has to pass before the site goes out.
+to `main`; the unit suite has to pass before the site goes out. The build's
+base path is `/DETECTOR/` (`vite.config.ts`), the e2e suite serves the build
+under that same path, and the workflow adds a `404.html` fallback and
+`.nojekyll`. Icons and the web manifest live in `public/`.
 
 ## Running it
 
@@ -115,7 +130,9 @@ main bundle is about 110 kB gzipped.
   is not a find: a line of the world's story, told once.
 - **Take a bearing.** With the surveyor's compass in your kit, the heading
   strip reads your facing as a compass bearing. Stand at the landmark a page
-  names, turn until the strip reads the number, walk the paces, and listen.
+  names, find the line (it runs at something you can see), walk it, and keep
+  checking the page's second sightline — turn to the compass point it names
+  and see whether the landmark sits under the needle yet. Then listen.
 - **The size of the moment matches the size of the find.** A bottle cap gets
   a glance and a single button. A real find gets the card. A clue, a
   connection or a new tool gets a held breath first — the camera settles on
@@ -272,10 +289,11 @@ findable, or a site's flags gate something nothing else ever unlocks.
 
 ## Save data
 
-Saved to `localStorage` under `unearth.save.v1`, versioned, and run through
+Saved to `localStorage` under `detector.save.v1` (namespaced, because every
+`scottyfncodes.github.io` project shares one origin), versioned, and run through
 migrations and then a field-by-field sanitiser on every load. A corrupt,
 truncated or newer-than-this-build save is set aside under
-`unearth.save.rejected` and the game starts clean instead of crashing. If
+`detector.save.rejected` and the game starts clean instead of crashing. If
 storage is unavailable (private browsing), the game falls back to an in-memory
 store and keeps working for that session.
 

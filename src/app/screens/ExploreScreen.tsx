@@ -30,7 +30,7 @@ import {
   stepPlayer,
 } from '@/systems/explore';
 import { nearestLandmarkNotice, nearestNamedLandmark } from '@/systems/landmarks';
-import { bearingFromYaw, compassPoint } from '@/systems/survey';
+import { bearingFromYaw, compassPoint, yawFromBearing } from '@/systems/survey';
 import { discoveryTier, resolveObservation } from '@/systems/discovery';
 import { buildDetectorProp, buildSiteScene } from '@/engine/scene3d/build';
 import { buildFieldScene, fieldToWorld, worldToField } from '@/engine/scene3d/buildField';
@@ -185,7 +185,7 @@ function ExploreScreenImpl() {
     promptKind: null,
     nearName: null,
     showIntro: true,
-    titleCard: mode === 'field' && !titledThisSession.has(`${field!.locationId}:${field!.seed}`),
+    titleCard: false,
     pinpointing: false,
     marked: false,
     remaining: 0,
@@ -240,8 +240,18 @@ function ExploreScreenImpl() {
     let disposeScene: () => void;
     let focus: Focus | null = null;
     let shake = 0;
+    // The arrival card waits for the first rendered frame: building the scene
+    // can take a real moment on a phone, and the card should play over the
+    // place it names, not over a blank canvas.
+    let titlePending = mode === 'field' && !!field && !titledThisSession.has(`${field.locationId}:${field.seed}`);
     if (mode === 'field' && field) titledThisSession.add(`${field.locationId}:${field.seed}`);
-    const titleTimer = setTimeout(() => setHud((prev) => ({ ...prev, titleCard: false })), 3600);
+    let titleTimer: ReturnType<typeof setTimeout> | undefined;
+    const arrive = () => {
+      if (!titlePending) return;
+      titlePending = false;
+      setHud((prev) => ({ ...prev, titleCard: true }));
+      titleTimer = setTimeout(() => setHud((prev) => ({ ...prev, titleCard: false })), 3600);
+    };
 
     const fit = () => {
       const rect = host.getBoundingClientRect();
@@ -561,11 +571,15 @@ function ExploreScreenImpl() {
       built.scene.add(camera);
       disposeScene = built.dispose;
       built.refreshStates(game.get().save);
+      // A return from a dig faces the way the player was facing. A fresh
+      // arrival faces the place's composed opening view, eyes a touch below
+      // the horizon, so the first frame is the ground and what stands on it.
+      const arrivalYaw = yawFromBearing(location.arrivalBearing ?? 0);
       const player: PlayerState = {
         x: fieldToWorld(field.playerX, built.halfWidth),
         z: fieldToWorld(field.playerY, built.halfHeight),
-        yaw: 0,
-        pitch: 0,
+        yaw: field.playerYaw ?? arrivalYaw,
+        pitch: field.playerYaw === undefined ? -0.07 : 0,
       };
 
       let sweepPhase = 0;
@@ -838,11 +852,12 @@ function ExploreScreenImpl() {
 
         if (elapsed - lastSave > 2) {
           lastSave = elapsed;
-          savePlayerPosition(playerXcm, playerYcm);
+          savePlayerPosition(playerXcm, playerYcm, player.yaw);
         }
 
         built.update(dt, elapsed);
         renderer.render(built.scene, camera);
+        arrive();
       });
 
       return () => {
@@ -852,7 +867,7 @@ function ExploreScreenImpl() {
         detachLook();
         renderer.dispose();
         disposeScene();
-        savePlayerPosition(worldToField(player.x, built.halfWidth), worldToField(player.z, built.halfHeight));
+        savePlayerPosition(worldToField(player.x, built.halfWidth), worldToField(player.z, built.halfHeight), player.yaw);
         audio.ambience(null);
         music.setScene(null);
         promptRef.current = null;

@@ -135,7 +135,7 @@ export const CLUES: ClueDef[] = [
     symbol: "Surveyor's hand",
     title: 'Page one: a bench mark',
     text:
-      'Torn from a field book, pencil, a steady hand: "Bench mark is the dedication stone in the park. From it, bearing 312, ten paces. The old plan says something is set there. Take the compass." The compass was in the crate with it.',
+      'Torn from a field book, pencil, a steady hand: "Bench mark is the dedication stone in the park. From it, bearing 312 — the line runs straight at the dead oak. The old plan says something is set on that line, where the lamp on the path stands due south of you. Take the compass." The compass was in the crate with it.',
     pointsTo: 'loc_old_park',
   },
   {
@@ -144,7 +144,7 @@ export const CLUES: ClueDef[] = [
     symbol: 'Three-pointed sun',
     title: 'Page two: the sun on the bolt',
     text:
-      'Inside the tin, a bench-mark bolt with a three-pointed sun stamped into its head, and the second page: "Line 14 was real. They marked it with the sun. Next mark: from the buffer stop at the railway, bearing 225, twelve paces. Listen for brass that is not railway brass."',
+      'Inside the tin, a bench-mark bolt with a three-pointed sun stamped into its head, and the second page: "Line 14 was real. They marked it with the sun. Next mark is at the railway. From the buffer stop, bearing 225 — the line brushes the signal box. Stop where the water tower stands north-west of you. Listen for brass that is not railway brass."',
     pointsTo: 'loc_old_railway',
   },
   {
@@ -153,8 +153,9 @@ export const CLUES: ClueDef[] = [
     symbol: "Surveyor's hand",
     title: 'Page three: behind the spoil',
     text:
-      'Wound around the plumb line, the third page. The hand is less steady now: "The spur runs into the mine ground. They boarded the adit. From the headframe, bearing 290 — there is a pocket in the rock the spoil hides. I left the book there in case." In case of what, it does not say.',
+      'Wound around the plumb line, the third page. The hand is less steady now: "The spur runs into the mine ground. They boarded the adit. From the headframe, bearing 290, into the rock. There is a pocket in it that the spoil hides; stand inside and the big spoil heap is due south. I left the book there in case." In case of what, it does not say.',
     pointsTo: 'loc_abandoned_mine',
+    opens: 'loc_abandoned_mine',
   },
   {
     id: 'clue_surveyor_4',

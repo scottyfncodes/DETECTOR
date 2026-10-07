@@ -3,7 +3,7 @@ import { startNewGame } from './helpers';
 
 test.describe('mobile shell', () => {
   test('no screen scrolls sideways and controls are thumb-sized', async ({ page }) => {
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
 

@@ -18,9 +18,9 @@ const SHOTS = 'test-results/screens';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    if (localStorage.getItem('unearth.save.v1')) return;
+    if (localStorage.getItem('detector.save.v1')) return;
     localStorage.setItem(
-      'unearth.save.v1',
+      'detector.save.v1',
       JSON.stringify({
         version: 1,
         createdAt: 1,
@@ -48,7 +48,7 @@ test.beforeEach(async ({ page }) => {
 test('walks in, renders the 3D world, and a dead-ahead notice goes through the site-flag pipeline', async ({
   page,
 }) => {
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
   await page.getByTestId('location-loc_silent_court').click();
   await page.screenshot({ path: `${SHOTS}/30-site-intro.png` });
 

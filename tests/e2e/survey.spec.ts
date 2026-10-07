@@ -38,8 +38,8 @@ test('a held page seeds its cache into ground already searched, and the compass 
   // cache itself is NOT in the seed — the game has to put it there.
   await page.addInitScript(
     (save) => {
-      if (localStorage.getItem('unearth.save.v1')) return;
-      localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+      if (localStorage.getItem('detector.save.v1')) return;
+      localStorage.setItem('detector.save.v1', JSON.stringify(save));
     },
     seededSave({
       field: {
@@ -49,12 +49,13 @@ test('a held page seeds its cache into ground already searched, and the compass 
         // Standing a pace south of the spot page one describes, facing north.
         playerX: 556,
         playerY: 700,
+        playerYaw: 0,
         holes: [],
         startedAt: 1,
       },
     }),
   );
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
 
   // The map draws the page's pencil line and says, in words, that a page points here.
   await expect(page.getByTestId('survey-map')).toBeVisible();
@@ -95,8 +96,8 @@ test('a held page seeds its cache into ground already searched, and the compass 
 test('a landmark offers its note once, by looking', async ({ page }) => {
   await page.addInitScript(
     (save) => {
-      if (localStorage.getItem('unearth.save.v1')) return;
-      localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+      if (localStorage.getItem('detector.save.v1')) return;
+      localStorage.setItem('detector.save.v1', JSON.stringify(save));
     },
     seededSave({
       field: {
@@ -106,12 +107,13 @@ test('a landmark offers its note once, by looking', async ({ page }) => {
         // Directly south of the dead oak, facing it.
         playerX: 330,
         playerY: 620,
+        playerYaw: 0,
         holes: [],
         startedAt: 1,
       },
     }),
   );
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
   await page.getByTestId('location-loc_old_park').click();
   await page.getByTestId('explore-canvas').waitFor();
 
@@ -140,4 +142,36 @@ test('a landmark offers its note once, by looking', async ({ page }) => {
   await page.waitForTimeout(300);
   const after = await readExploreFrame(page);
   expect(after?.promptLabel).toBeNull();
+});
+
+test('a fresh arrival faces its composed opening view, and the arrival card plays over the world', async ({ page }) => {
+  await page.addInitScript(
+    (save) => {
+      if (localStorage.getItem('detector.save.v1')) return;
+      localStorage.setItem('detector.save.v1', JSON.stringify(save));
+    },
+    seededSave({
+      field: {
+        locationId: 'loc_old_park',
+        seed: 11,
+        targets: [{ uid: 'filler', targetId: 'tgt_bottle_cap', x: 1300, y: 1300, depth: 8, baseCondition: 80, dug: false }],
+        // No saved facing: this is an arrival, not a return from a dig.
+        playerX: 700,
+        playerY: 700,
+        holes: [],
+        startedAt: 1,
+      },
+    }),
+  );
+  await page.goto('./?debug=1');
+  await page.getByTestId('location-loc_old_park').click();
+  await page.getByTestId('explore-canvas').waitFor();
+
+  // The card waits for the world to be drawn, then names the place over it.
+  await expect(page.locator('.title-card')).toContainText(/old park/i);
+  const frame = await readExploreFrame(page);
+  expect(frame).not.toBeNull();
+  const bearing = (((frame!.yaw * 180) / Math.PI) % 360 + 360) % 360;
+  expect(Math.abs(bearing - 215)).toBeLessThan(2);
+  await expect(page.getByTestId('compass')).toContainText(/215°\s*SW/);
 });

@@ -23,7 +23,7 @@ export function TitleScreen() {
 
   return (
     <div className="title-screen">
-      <h1 className="title-screen__logo">UNEARTH</h1>
+      <h1 className="title-screen__logo">DETECTOR</h1>
       <div className="title-screen__rule" />
       <p className="title-screen__tag">
         Most of what the ground gives up is rubbish.
@@ -35,7 +35,7 @@ export function TitleScreen() {
       </Btn>
       {returning ? (
         <p className="tiny" style={{ marginTop: 18 }}>
-          {save.discoveries.length} find{save.discoveries.length === 1 ? '' : 's'} in your journal
+          Your journal is where you left it.
         </p>
       ) : (
         <p className="tiny" style={{ marginTop: 18 }}>
