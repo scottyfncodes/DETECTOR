@@ -145,6 +145,8 @@ export function MapScreen() {
             const caches = knownCachesAt(loc.id);
             const isAdventure = !!loc.adventureId;
             const done = isAdventure && save.adventures[loc.adventureId!] === 'complete';
+            // The ground you walked away from mid-search: pencilled round, no tally.
+            const current = save.field?.locationId === loc.id;
             const style = { left: `${loc.map.x * 100}%`, top: `${loc.map.y * 100}%` };
             if (!unlocked) {
               return (
@@ -157,7 +159,7 @@ export function MapScreen() {
             return (
               <button
                 key={loc.id}
-                className={`marker ${caches > 0 ? 'marker--pull' : ''} ${isAdventure ? 'marker--adventure' : ''}`}
+                className={`marker ${caches > 0 ? 'marker--pull' : ''} ${isAdventure ? 'marker--adventure' : ''} ${current ? 'marker--current' : ''}`}
                 style={style}
                 data-ui="true"
                 data-testid={`location-${loc.id}`}
@@ -166,10 +168,16 @@ export function MapScreen() {
                   else enterLocation(loc.id);
                 }}
               >
-                <span className="marker__dot" />
+                <span className="marker__dot">{current ? <span className="marker__pencil" aria-hidden="true" /> : null}</span>
                 <span className="marker__label">{loc.name}</span>
                 <span className="marker__meta">
-                  {isAdventure ? (done ? 'revisit' : 'enter') : caches > 0 ? 'a page points here' : findsHere > 0 ? 'searched before' : 'walk in'}
+                  {isAdventure ? (done ? 'revisit' : 'enter') : caches > 0
+                      ? 'a page points here'
+                      : current
+                        ? 'where you left off'
+                        : findsHere > 0
+                          ? 'searched before'
+                          : 'walk in'}
                 </span>
               </button>
             );

@@ -278,6 +278,31 @@ class AudioEngine {
     }
   }
 
+  /** Going down on one knee at the spot: a soft shuffle of boots and earth. */
+  kneel(): void {
+    this.grain(0.5, 150, 700, 0.35);
+  }
+
+  /** The find lifts clear of the hole — a rising, airy sweep ahead of the reveal chord. */
+  lift(): void {
+    if (!this.ctx || !this.master || !this.enabled) return;
+    const t = this.now();
+    const src = this.noiseSource();
+    if (!src) return;
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(300, t);
+    bp.frequency.exponentialRampToValueAtTime(3200, t + 0.7);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.35);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+    src.connect(bp).connect(g).connect(this.master);
+    src.start(t);
+    src.stop(t + 0.9);
+  }
+
   /** A quiet pencil-on-paper tick for a landmark note. Not a find; a remark. */
   note(): void {
     this.grain(0.25, 1800, 4200, 0.07, true);

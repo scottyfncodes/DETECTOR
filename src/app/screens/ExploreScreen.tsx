@@ -39,6 +39,7 @@ import { music } from '@/engine/music';
 import { haptics } from '@/engine/haptics';
 import { capturePointer, LookController, MoveController } from '@/engine/input';
 import { startLoop } from '@/engine/loop';
+import { QualityGovernor } from '@/engine/quality';
 import { publishDetectorFrame, publishExploreFrame } from '@/core/debug';
 import { useGameState } from '../useGame';
 import { Btn } from '../components/ui';
@@ -52,6 +53,8 @@ const SWEEP_WIDTH = 0.46; // metres either side at full amplitude
 const COIL_FORWARD = 0.62; // metres ahead of the player
 const MARK_LIFETIME = 6; // seconds a pinpoint mark stays diggable after release
 const FOV = 72;
+const PINPOINT_FOV = 62; // the frame narrows while you hold still over a spot
+const KNEEL_MS = 380; // the fade from standing to the hole
 
 interface Dominant {
   dig: DetectorDig;
@@ -76,6 +79,7 @@ interface FieldActions {
  * Ordinary finds skip it entirely — the contrast is the point.
  */
 interface Focus {
+  fromFov: number;
   fromYaw: number;
   fromPitch: number;
   toYaw: number;
@@ -149,6 +153,8 @@ interface Hud {
   titleCard: boolean;
   pinpointing: boolean;
   marked: boolean;
+  /** Going down on one knee into the hole — the fade before the pit. */
+  kneeling: boolean;
   remaining: number;
   hint: string | null;
   compass: boolean;
@@ -188,6 +194,7 @@ function ExploreScreenImpl() {
     titleCard: false,
     pinpointing: false,
     marked: false,
+    kneeling: false,
     remaining: 0,
     hint: null,
     compass: hasEquipment('tool_compass'),
@@ -210,7 +217,7 @@ function ExploreScreenImpl() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     // Far plane comfortably past the sky dome (built at a fixed radius of 320)
     // so it never gets near-clipped away, even though fog hides real geometry
     // long before that distance.
@@ -233,6 +240,41 @@ function ExploreScreenImpl() {
     const compassEls = { strip: compassRef.current, tape: tapeRef.current, heading: headingRef.current };
     const vignette = vignetteRef.current;
     audio.unlock();
+
+    // Weak phones step down gracefully: sharper-than-needed pixels go first,
+    // then shadows. The scene is looked up lazily — it's built just below.
+    let shadowCasters: THREE.Object3D | null = null;
+    const governor = new QualityGovernor((level) => {
+      if (level >= 1) renderer.setPixelRatio(Math.min(1.25, window.devicePixelRatio || 1));
+      if (level >= 2) {
+        shadowCasters?.traverse((obj) => {
+          if ((obj as THREE.Light).isLight) obj.castShadow = false;
+        });
+      }
+    });
+
+    // Digging is a commitment: the view drops and fades before the pit opens.
+    let kneelTimer: ReturnType<typeof setTimeout> | null = null;
+    let kneeling = false;
+    let kneelK = 0;
+    /** Advances the kneel for a frame; returns the eased 0..1 drop. */
+    const stepKneel = (player: PlayerState, dt: number): number => {
+      if (!kneeling) return 0;
+      kneelK = Math.min(1, kneelK + dt / (KNEEL_MS / 1000));
+      // Eyes go down to the spot as the body does.
+      player.pitch = lerp(player.pitch, -0.75, clamp01(dt * 7));
+      return easeInOut(kneelK);
+    };
+    const kneelThen = (then: () => void) => {
+      if (kneelTimer) return;
+      kneeling = true;
+      setHud((prev) => ({ ...prev, kneeling: true, promptLabel: null, promptKind: null }));
+      audio.kneel();
+      haptics.tap();
+      kneelTimer = setTimeout(then, KNEEL_MS);
+    };
+    /** Field of view the frame rests at when no focus beat owns it. */
+    let restFov = FOV;
 
     let lastW = 0;
     let lastH = 0;
@@ -270,8 +312,8 @@ function ExploreScreenImpl() {
     const runFocus = (player: PlayerState, dt: number): boolean => {
       if (!focus) {
         // Let the frame breathe back out after a beat that stayed in the world.
-        if (Math.abs(camera.fov - FOV) > 0.01) {
-          camera.fov = lerp(camera.fov, FOV, clamp01(dt * 4));
+        if (Math.abs(camera.fov - restFov) > 0.01) {
+          camera.fov = lerp(camera.fov, restFov, clamp01(dt * 4));
           camera.updateProjectionMatrix();
         }
         if (Math.abs(renderer.toneMappingExposure - 1.15) > 0.001) {
@@ -287,7 +329,7 @@ function ExploreScreenImpl() {
       const k = easeInOut(clamp01(focus.t / focus.dur));
       player.yaw = lerpAngle(focus.fromYaw, focus.toYaw, k);
       player.pitch = lerp(focus.fromPitch, focus.toPitch, k);
-      camera.fov = lerp(FOV, 58, k);
+      camera.fov = lerp(focus.fromFov, 58, k);
       camera.updateProjectionMatrix();
       renderer.toneMappingExposure = lerp(1.15, 0.8, k);
       if (vignette) vignette.style.opacity = `${k * 0.85}`;
@@ -309,6 +351,7 @@ function ExploreScreenImpl() {
       const dy = target.y - camera.position.y;
       const horizontal = Math.max(0.2, Math.hypot(dx, dz));
       focus = {
+        fromFov: camera.fov,
         fromYaw: player.yaw,
         fromPitch: player.pitch,
         toYaw: Math.atan2(dx, -dz),
@@ -353,6 +396,7 @@ function ExploreScreenImpl() {
 
       const built = buildSiteScene(site);
       built.scene.add(camera);
+      shadowCasters = built.scene;
       disposeScene = built.dispose;
       const colliders: Collider[] = buildColliders(site.props);
       const player: PlayerState = { x: site.spawn.x, z: site.spawn.z, yaw: site.spawnYaw, pitch: 0 };
@@ -427,7 +471,7 @@ function ExploreScreenImpl() {
       const digHere = (d: Dominant) => {
         audio.unlock();
         const tol = digTolerance(d.def, currentDetector());
-        beginDig({
+        kneelThen(() => beginDig({
           locationId: hostLocationId,
           targetUid: `site_${d.dig.id}`,
           targetId: d.dig.targetId,
@@ -441,7 +485,7 @@ function ExploreScreenImpl() {
           digX: player.x * 100,
           digY: player.z * 100,
           seed: `${site.id}_${d.dig.id}`,
-        });
+        }));
       };
 
       audio.ambience(site.ambience);
@@ -457,6 +501,7 @@ function ExploreScreenImpl() {
 
       loop = startLoop((dt, elapsed) => {
         fit();
+        governor.sample(dt);
         const currentSave = game.get().save;
         const discovered = currentSave.discoveries.map((d) => d.targetId);
 
@@ -466,8 +511,8 @@ function ExploreScreenImpl() {
 
         const result = stepPlayer(player, {
           dt,
-          moveX: !focusing && move.magnitude > 0.02 ? move.vector.x : 0,
-          moveY: !focusing && move.magnitude > 0.02 ? -move.vector.y : 0,
+          moveX: !focusing && !kneeling && move.magnitude > 0.02 ? move.vector.x : 0,
+          moveY: !focusing && !kneeling && move.magnitude > 0.02 ? -move.vector.y : 0,
           yawDelta: focusing ? 0 : look.yaw,
           pitchDelta: focusing ? 0 : look.pitch,
           speed: WALK_SPEED,
@@ -489,7 +534,8 @@ function ExploreScreenImpl() {
         const sx = shake > 0 ? (Math.sin(elapsed * 41) * 0.02 + Math.sin(elapsed * 67) * 0.012) * shake : 0;
         const sy = shake > 0 ? Math.sin(elapsed * 53) * 0.016 * shake : 0;
 
-        camera.position.set(player.x + sx, EYE_HEIGHT + bob + sy, player.z);
+        const kneelDrop = stepKneel(player, dt);
+        camera.position.set(player.x + sx, EYE_HEIGHT * (1 - 0.45 * kneelDrop) + bob + sy, player.z);
         camera.rotation.y = -player.yaw;
         camera.rotation.x = player.pitch;
         detectorProp.coilSwing.rotation.y = Math.sin(bobPhase * 0.5) * 0.08;
@@ -569,8 +615,11 @@ function ExploreScreenImpl() {
     } else if (location && field) {
       const built = buildFieldScene(location, field.seed);
       built.scene.add(camera);
+      shadowCasters = built.scene;
       disposeScene = built.dispose;
       built.refreshStates(game.get().save);
+      // The ground remembers: every hole already dug here is still here.
+      built.showHoles(field.holes);
       // A return from a dig faces the way the player was facing. A fresh
       // arrival faces the place's composed opening view, eyes a touch below
       // the horizon, so the first frame is the ground and what stands on it.
@@ -620,7 +669,7 @@ function ExploreScreenImpl() {
 
         audio.unlock();
         if (!best) {
-          beginDig({
+          kneelThen(() => beginDig({
             locationId: field.locationId,
             targetUid: null,
             targetId: null,
@@ -631,12 +680,12 @@ function ExploreScreenImpl() {
             digX: digXcm,
             digY: digYcm,
             seed: `${field.seed}_${Math.round(digXcm)}_${Math.round(digYcm)}`,
-          });
+          }));
           return;
         }
 
         const placed = field.targets.find((t) => t.uid === best!.uid)!;
-        beginDig({
+        kneelThen(() => beginDig({
           locationId: field.locationId,
           targetUid: placed.uid,
           targetId: placed.targetId,
@@ -648,7 +697,7 @@ function ExploreScreenImpl() {
           digY: digYcm,
           seed: `${placed.uid}_${Math.round(digXcm)}`,
           ...(placed.tutorial ? { tutorial: true } : {}),
-        });
+        }));
       };
 
       fieldActionsRef.current = { setPinpoint, dig: digHere };
@@ -671,13 +720,15 @@ function ExploreScreenImpl() {
 
         const move = moveRef.current;
         const look = lookRef.current.consume(dt);
+        governor.sample(dt);
+        restFov = pinpointing ? PINPOINT_FOV : FOV;
         const focusing = runFocus(player, dt);
         const speed = WALK_SPEED * (pinpointing ? 0.42 : 1);
 
         stepPlayer(player, {
           dt,
-          moveX: !focusing && move.magnitude > 0.02 ? move.vector.x : 0,
-          moveY: !focusing && move.magnitude > 0.02 ? -move.vector.y : 0,
+          moveX: !focusing && !kneeling && move.magnitude > 0.02 ? move.vector.x : 0,
+          moveY: !focusing && !kneeling && move.magnitude > 0.02 ? -move.vector.y : 0,
           yawDelta: focusing ? 0 : look.yaw,
           pitchDelta: focusing ? 0 : look.pitch,
           speed,
@@ -710,6 +761,14 @@ function ExploreScreenImpl() {
           const stale = elapsed - mark.at > MARK_LIFETIME;
           const walkedOff = Math.hypot(coilXcm - mark.x, coilYcm - mark.y) > 180;
           if (stale || walkedOff) mark = null;
+        }
+        // The scratch appears when you let go — where the coil was, not
+        // trailing it — and is scuffed away once the mark lapses.
+        if (mark && !pinpointing) {
+          built.pinpointMark.place(fieldToWorld(mark.x, built.halfWidth), fieldToWorld(mark.y, built.halfHeight));
+          built.pinpointMark.setVisible(true);
+        } else {
+          built.pinpointMark.setVisible(false);
         }
 
         // ── signal ────────────────────────────────────────────────────
@@ -744,7 +803,8 @@ function ExploreScreenImpl() {
         bobPhase += dt * (move.magnitude > 0.05 && !focusing ? 7.2 : 0);
         const bob = move.magnitude > 0.05 && !focusing ? Math.sin(bobPhase) * 0.028 : 0;
         const groundY = built.groundAt(player.x, player.z);
-        eyeY = lerp(eyeY, EYE_HEIGHT + groundY, clamp01(dt * 9));
+        const kneelDrop = stepKneel(player, dt);
+        eyeY = lerp(eyeY, EYE_HEIGHT * (1 - 0.45 * kneelDrop) + groundY, clamp01(dt * 9));
         camera.position.set(player.x, eyeY + bob, player.z);
         camera.rotation.y = -player.yaw;
         camera.rotation.x = player.pitch;
@@ -862,6 +922,7 @@ function ExploreScreenImpl() {
 
       return () => {
         clearTimeout(titleTimer);
+        if (kneelTimer) clearTimeout(kneelTimer);
         loop.stop();
         detachMove();
         detachLook();
@@ -882,6 +943,7 @@ function ExploreScreenImpl() {
 
     return () => {
       clearTimeout(titleTimer);
+      if (kneelTimer) clearTimeout(kneelTimer);
       loop.stop();
       detachMove();
       detachLook();
@@ -902,7 +964,7 @@ function ExploreScreenImpl() {
   const showCompass = hud.compass || hasEquipment('tool_compass');
 
   return (
-    <div className="screen screen--world" ref={hostRef}>
+    <div className={`screen screen--world ${hud.kneeling ? 'screen--kneel' : ''}`} ref={hostRef}>
       <canvas ref={canvasRef} className="world" data-testid="explore-canvas" />
       <div ref={vignetteRef} className="vignette" aria-hidden="true" />
       <div ref={moveZoneRef} style={{ position: 'absolute', inset: 0, width: '44%', touchAction: 'none' }} />
@@ -1066,6 +1128,7 @@ function ExploreScreenImpl() {
           </div>
         ) : null}
       </div>
+      <div className={`kneel-fade ${hud.kneeling ? 'kneel-fade--on' : ''}`} aria-hidden="true" />
     </div>
   );
 }

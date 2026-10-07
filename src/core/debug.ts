@@ -2,7 +2,7 @@
  * Read-only introspection hook.
  *
  * Off by default. Enabled in dev, or in any build with `?debug=1`, where it
- * exposes `window.__unearth` for automated tests and for debugging a field
+ * exposes `window.__detector` for automated tests and for debugging a field
  * without having to guess what the audio is telling you. It exposes state and
  * nothing else — there are no cheats in here, and gameplay never reads it.
  */
@@ -52,7 +52,7 @@ export function publishExploreFrame(frame: ExploreFrame): void {
 
 export function installDebug(): void {
   if (!DEBUG_ENABLED) return;
-  (window as unknown as Record<string, unknown>).__unearth = {
+  (window as unknown as Record<string, unknown>).__detector = {
     state: () => game.get(),
     frames,
   };

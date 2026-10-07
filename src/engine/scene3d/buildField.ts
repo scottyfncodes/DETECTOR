@@ -20,6 +20,7 @@ import { buildGrass, type GrassField } from './grass';
 import { buildLandmark, disposeMaterials, makeMaterials, type BuiltLandmark } from './landmarks';
 import { billboardMesh, disposeObject } from './build';
 import { findSprite } from './textures';
+import { buildHoleLayer, buildPinpointMark, type HoleLayer, type PinpointMark } from './marks';
 
 export interface BuiltField {
   scene: THREE.Scene;
@@ -32,6 +33,12 @@ export interface BuiltField {
   sceneryMeshes: Map<string, THREE.Object3D>;
   /** Landmark id -> what was built for it. */
   landmarks: Map<string, BuiltLandmark>;
+  /** Holes the player has dug here, laid on the turf. */
+  holes: HoleLayer;
+  /** The scratch left where the player last pinpointed. */
+  pinpointMark: PinpointMark;
+  /** Lays every saved hole (field centimetres) onto the ground. */
+  showHoles(holes: readonly { x: number; y: number; found: boolean }[]): void;
   /** Re-reads which landmarks should stand open for the current save. */
   refreshStates(save: Pick<SaveData, 'chainsComplete' | 'siteProgress'>): void;
   /** Per-frame motion: wind, water, lamps, clouds. */
@@ -132,6 +139,8 @@ export function buildFieldScene(location: LocationDef, seed: number): BuiltField
   }
 
   const colliders = landmarkColliders(location);
+  const holes = buildHoleLayer(scene, groundAt);
+  const pinpointMark = buildPinpointMark(scene, groundAt);
 
   return {
     scene,
@@ -142,6 +151,11 @@ export function buildFieldScene(location: LocationDef, seed: number): BuiltField
     sky,
     sceneryMeshes,
     landmarks,
+    holes,
+    pinpointMark,
+    showHoles(list) {
+      for (const h of list) holes.add(fieldToWorld(h.x, halfWidth), fieldToWorld(h.y, halfHeight), h.found);
+    },
     refreshStates(save) {
       for (const def of location.landmarks ?? []) {
         landmarks.get(def.id)?.setOpen(isLandmarkOpen(def, save));
@@ -151,9 +165,12 @@ export function buildFieldScene(location: LocationDef, seed: number): BuiltField
       sky.update(dt, elapsed);
       grass?.update(elapsed);
       for (const built of landmarks.values()) built.update?.(dt, elapsed);
+      pinpointMark.update(dt);
     },
     groundAt,
     dispose: () => {
+      holes.dispose();
+      pinpointMark.dispose();
       sky.dispose();
       grass?.dispose();
       disposeMaterials(materials);

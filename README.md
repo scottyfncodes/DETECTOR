@@ -120,9 +120,12 @@ main bundle is about 110 kB gzipped.
   bright for silver, wrong and doubled for things that should not be down
   there. There is no on-screen meter for this on purpose: the detector talks
   to you through your ears, not a percentage.
-- **Hold PINPOINT** to narrow the sweep and read the target. That also drops a
-  mark on the ground, which is the spot DIG will dig — so you can release the
-  button and still dig where you found it.
+- **Hold PINPOINT** to narrow the sweep and read the target; the frame
+  narrows with you. Letting go scratches a mark into the dirt where the coil
+  was — a plain scuffed cross, no glow and no strength — which is the spot DIG
+  will dig, so you can release the button and still dig where you found it.
+  Digging is a commitment: you go down on one knee and the light goes before
+  the pit opens.
 - **OBSERVE.** Some things are never buried — a carving on a wall, a plaque
   half-sunk in the grass, boot prints that are not yours. Walk up, look at it,
   and a single contextual prompt appears. No detector involved; you only find
@@ -139,9 +142,13 @@ main bundle is about 110 kB gzipped.
   the thing, the frame narrows and darkens, a low swell — and then the card.
   A completed chain gets the room: its symbols drawn and joined into a
   constellation, the motif in full, and a new line inked onto the map.
-- **Dig.** Scoop out the bulk, and the moment you feel the tool touch
-  something, switch to the brush. The scoop does not care what it hits.
-- **Lift it out** once about 70% of it is uncovered. Condition is permanent.
+- **Dig.** The pit is a hole cut into that field's own turf, with the spoil
+  piling up round the rim as you work. Scoop out the bulk, and the moment you
+  feel the tool touch something, switch to the brush. The scoop does not care
+  what it hits. The tool under your finger is the tool, turned the way you are
+  dragging, and the dirt flies the way you throw it.
+- **Lift it out** once about 70% of it is uncovered. It comes up out of the
+  hole, crumbs falling, before the card. Condition is permanent.
 - Some finds carry markings. Those go in the journal as clues, and clues
   connect — the same recurring symbol on two "unrelated" finds is a real
   in-game signal, not decoration, and the journal's Links tab surfaces it,
@@ -151,7 +158,9 @@ main bundle is about 110 kB gzipped.
   fitting them together produces the whole object — and changes what you know.
 
 Digging in the wrong place gives you an empty hole. That is intended: the
-target stays in the ground and you can go back and find it properly. Likewise,
+target stays in the ground and you can go back and find it properly. The
+ground remembers either way — every hole you dig stays where you dug it, open
+where something came out, a filled plug of turned soil where nothing did. Likewise,
 you can walk straight past something you never looked at — that is intended
 too.
 
@@ -161,7 +170,8 @@ The map is a drawn survey sheet, not a list. Places sit where they are. A
 place you cannot enter yet is not on the map at all — until something you
 hold names it, at which point a faint pencil line runs from where you found
 that clue toward a dashed ring and a question mark. When a chain resolves, an
-ink line ties its places together for good. The map is the one screen where
+ink line ties its places together for good. The field you walked away from
+mid-search is circled in pencil. The map is the one screen where
 "everything is connected" is literally visible, and it never shows a count.
 
 ### Sound
@@ -228,6 +238,8 @@ src/
                           named landmark the player is standing at
   engine/         browser-facing, imperative
     loop.ts             rAF loop with clamped delta, pauses when hidden
+    quality.ts           steps pixel ratio, then shadows, down on a phone
+                          that can't hold the frame rate
     input.ts             touch move stick, look drag controller, drag tracker,
                           canvas fitting
     audio.ts             everything synthesised with Web Audio
@@ -238,7 +250,9 @@ src/
                             detector prop both share; atmosphere.ts is the
                             sky, sun, clouds and shadow rig, terrainMesh.ts
                             the ground, grass.ts the instanced wind grass,
-                            landmarks.ts what every LandmarkKind is made of;
+                            landmarks.ts what every LandmarkKind is made of,
+                            marks.ts the dug holes and pinpoint scratch laid
+                            onto the rolling ground;
                             artifact sprites reuse render/object.ts so a
                             carving looks the same in the world as it does in
                             the journal
@@ -299,7 +313,7 @@ store and keeps working for that session.
 
 ## Debug hook
 
-Load any build with `?debug=1` to get a read-only `window.__unearth` exposing
+Load any build with `?debug=1` to get a read-only `window.__detector` exposing
 game state and the live detector/explore frames. It exists for debugging and
 for the end-to-end tests, which use it as their "ears" while driving the game
 through real input. It grants nothing a player could not work out by looking
