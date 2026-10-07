@@ -28,47 +28,63 @@
       <stop offset="0" stop-color="#3a3f47"/>
       <stop offset="1" stop-color="#15171b"/>
     </linearGradient>
-    <clipPath id="under"><rect x="0" y="292" width="512" height="220"/></clipPath>
+    <clipPath id="under"><rect x="0" y="316" width="512" height="196"/></clipPath>
   </defs>
 
   <!-- dusk sky and the sun sitting on the horizon -->
-  <rect width="512" height="300" fill="url(#sky)"/>
-  <circle cx="128" cy="292" r="120" fill="url(#sun)"/>
+  <rect width="512" height="324" fill="url(#sky)"/>
+  <circle cx="118" cy="316" r="124" fill="url(#sun)"/>
   <!-- far ridge -->
-  <path d="M0 268 Q70 248 140 262 T290 256 T420 266 T512 258 V300 H0Z" fill="#2a2420" opacity="0.85"/>
+  <path d="M0 292 Q70 272 140 286 T290 280 T420 290 T512 282 V324 H0Z" fill="#2a2420" opacity="0.85"/>
 
   <!-- the ground, cut away to show what it is keeping -->
-  <rect y="292" width="512" height="220" fill="url(#earth)"/>
-  <path d="M0 292 H512" stroke="#e7a75a" stroke-opacity="0.55" stroke-width="3"/>
+  <rect y="316" width="512" height="196" fill="url(#earth)"/>
+  <path d="M0 316 H512" stroke="#e7a75a" stroke-opacity="0.55" stroke-width="3"/>
   <g clip-path="url(#under)" fill="none" stroke="#5a4532" stroke-opacity="0.45" stroke-width="2">
-    <path d="M0 340 Q128 330 256 342 T512 336"/>
+    <path d="M0 360 Q128 350 256 362 T512 356"/>
     <path d="M0 470 Q140 458 270 472 T512 462"/>
   </g>
 
   <!-- the find, and its signal rising to the coil -->
-  <circle cx="250" cy="418" r="96" fill="url(#glow)"/>
+  <circle cx="236" cy="436" r="84" fill="url(#glow)"/>
   <g fill="none" stroke="#f2c46a" stroke-linecap="round">
-    <path d="M200 380 Q250 358 300 380" stroke-width="11" stroke-opacity="0.95"/>
-    <path d="M176 346 Q250 314 324 346" stroke-width="9" stroke-opacity="0.65"/>
-    <path d="M156 314 Q250 274 344 314" stroke-width="7" stroke-opacity="0.38"/>
+    <path d="M196 404 Q236 386 276 404" stroke-width="9" stroke-opacity="0.95"/>
+    <path d="M178 374 Q236 350 294 374" stroke-width="8" stroke-opacity="0.65"/>
+    <path d="M162 344 Q236 314 310 344" stroke-width="6" stroke-opacity="0.4"/>
   </g>
-  <ellipse cx="250" cy="425" rx="38" ry="13" fill="#8a5d1c"/>
-  <ellipse cx="250" cy="418" rx="38" ry="13" fill="url(#gold)"/>
-  <ellipse cx="246" cy="415" rx="16" ry="4.5" fill="#fff1c4" opacity="0.8"/>
+  <ellipse cx="236" cy="443" rx="30" ry="10" fill="#8a5d1c"/>
+  <ellipse cx="236" cy="437" rx="30" ry="10" fill="url(#gold)"/>
+  <ellipse cx="233" cy="435" rx="13" ry="3.6" fill="#fff1c4" opacity="0.8"/>
 
-  <!-- the detector: shaft, cuff and grip, coil hovering over the ground -->
-  <g stroke-linecap="round" fill="none">
-    <path d="M290 250 L392 94" stroke="#0d0e10" stroke-width="30"/>
-    <path d="M290 250 L392 94" stroke="#c99a46" stroke-width="18"/>
-    <path d="M296 238 L388 98" stroke="#ffe0a0" stroke-width="4" stroke-opacity="0.7"/>
-    <path d="M340 160 L384 188" stroke="#0d0e10" stroke-width="26"/>
-    <path d="M340 160 L384 188" stroke="#3a3330" stroke-width="16"/>
-    <path d="M386 104 Q412 82 430 104" stroke="#0d0e10" stroke-width="24"/>
-    <path d="M386 104 Q412 82 430 104" stroke="#3a3330" stroke-width="14"/>
+  <!-- the detector, true to scale: a coil about a quarter of the shaft's
+       length, mounted at its centre through a yoke; control box, grip and
+       armrest cuff up the shaft. -->
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- shaft: coil centre up to the cuff -->
+    <path d="M236 284 L394 62" stroke="#0d0e10" stroke-width="25"/>
+    <path d="M236 284 L394 62" stroke="#c99a46" stroke-width="14"/>
+    <path d="M243 268 L389 64" stroke="#ffe3a6" stroke-width="3.5" stroke-opacity="0.7"/>
+    <!-- grip, hanging below the shaft -->
+    <path d="M358 112 L384 150" stroke="#0d0e10" stroke-width="22"/>
+    <path d="M358 112 L384 150" stroke="#3b3431" stroke-width="12"/>
+    <!-- armrest cuff -->
+    <path d="M386 26 L408 42 Q414 62 390 72 L368 56" stroke="#0d0e10" stroke-width="18"/>
+    <path d="M386 26 L408 42 Q414 62 390 72 L368 56" stroke="#3b3431" stroke-width="9"/>
   </g>
-  <ellipse cx="250" cy="264" rx="146" ry="44" fill="#0a0a0c"/>
-  <ellipse cx="250" cy="259" rx="141" ry="40" fill="url(#coilTop)"/>
-  <ellipse cx="250" cy="259" rx="141" ry="40" fill="none" stroke="url(#gold)" stroke-width="13"/>
-  <ellipse cx="250" cy="259" rx="84" ry="21" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="4"/>
-  <path d="M126 246 Q250 214 374 246" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+  <!-- control box -->
+  <g transform="rotate(-54.6 314 174)">
+    <rect x="280" y="156" width="68" height="36" rx="9" fill="#0d0e10"/>
+    <rect x="285" y="161" width="58" height="26" rx="6" fill="#2b2a2b"/>
+    <rect x="292" y="166" width="26" height="16" rx="3" fill="#e9b65a"/>
+    <circle cx="330" cy="174" r="5" fill="#c99a46"/>
+  </g>
+  <!-- coil -->
+  <ellipse cx="236" cy="298" rx="98" ry="29" fill="#0a0a0c"/>
+  <ellipse cx="236" cy="294" rx="94" ry="26" fill="url(#coilTop)"/>
+  <ellipse cx="236" cy="294" rx="94" ry="26" fill="none" stroke="url(#gold)" stroke-width="10"/>
+  <ellipse cx="236" cy="294" rx="56" ry="13" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="3"/>
+  <path d="M152 286 Q236 264 320 286" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+  <!-- yoke: the shaft meets the coil at its centre -->
+  <path d="M220 292 L232 272 L252 272 L256 292" fill="none" stroke="#0d0e10" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M220 292 L232 272 L252 272 L256 292" fill="none" stroke="#c99a46" stroke-width="5" stroke-linejoin="round"/>
 </svg>
