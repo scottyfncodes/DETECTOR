@@ -1,5 +1,5 @@
 /**
- * UNEARTH — shared content & state types.
+ * DETECTOR — shared content & state types.
  *
  * Nothing in here imports from the UI layer. Content (src/content) is pure
  * data that conforms to these shapes; systems (src/systems) transform it.

@@ -66,6 +66,9 @@ export function ExcavateScreen() {
   const particlesRef = useRef<PitParticle[]>([]);
   const flashRef = useRef(0);
   const shakeRef = useRef(0);
+  const liftRef = useRef(0);
+  const liftDoneRef = useRef(false);
+  const onLiftDoneRef = useRef<(() => void) | null>(null);
 
   const tools = useMemo(() => {
     const owned = ['tool_scoop', 'tool_brush', 'tool_pick', 'tool_fine_brush']
@@ -77,7 +80,8 @@ export function ExcavateScreen() {
 
   const [toolId, setToolId] = useState(tools[0]?.id ?? 'tool_scoop');
   const toolRef = useRef<ToolDef>(getTool(toolId) ?? tools[0]!);
-  const [hud, setHud] = useState({ condition: 100, exposed: 0, ready: false, cleared: 0, hasObject: true });
+  const [hud, setHud] = useState({ condition: 100, exposed: 0, ready: false, cleared: 0, hasObject: true, lifting: false });
+  const firstDig = save.stats.holesDug === 0;
 
   const hasPinpointer = hasEquipment('tool_pinpointer');
 
@@ -92,6 +96,8 @@ export function ExcavateScreen() {
     const host = hostRef.current;
     if (!canvas || !host) return;
 
+    liftRef.current = 0;
+    liftDoneRef.current = false;
     const state = createExcavation({
       def: def ?? soilOnlyDef(location.hardness),
       location,
@@ -117,8 +123,16 @@ export function ExcavateScreen() {
       const drag = dragRef.current;
       const tool = toolRef.current;
 
+      const lifting = liftRef.current > 0;
+      // Finger direction, for the tool glyph and for which way the dirt flies.
+      const ddx = drag.pos.x - drag.prev.x;
+      const ddy = drag.pos.y - drag.prev.y;
+      const dlen = Math.hypot(ddx, ddy) || 1;
+      const toolVX = drag.down ? (ddx / dlen) * Math.min(1.5, drag.speed) : 0;
+      const toolVY = drag.down ? (ddy / dlen) * Math.min(1.5, drag.speed) : 0;
+
       // ── tool application ────────────────────────────────────────────
-      if (drag.down && tool.power > 0) {
+      if (drag.down && tool.power > 0 && !lifting) {
         const result = applyTool(state, tool, drag.pos.x, drag.pos.y, dt, performance.now());
         if (result.removed > 0.02 || result.debrisRemoved > 0.02) {
           spawnParticles(
@@ -127,6 +141,8 @@ export function ExcavateScreen() {
             drag.pos.y,
             tool.kind === 'brush' ? 2 : 3,
             tool.kind === 'brush' ? 'dust' : 'dirt',
+            toolVX,
+            toolVY,
           );
         }
         if (result.strike) {
@@ -167,17 +183,30 @@ export function ExcavateScreen() {
       flashRef.current = Math.max(0, flashRef.current - dt * 2.2);
       shakeRef.current = Math.max(0, shakeRef.current - dt * 26);
 
+      // ── the lift: ~a second of the object rising clear, then the ceremony ──
+      if (lifting && !liftDoneRef.current) {
+        liftRef.current = Math.min(1, liftRef.current + dt / 1.05);
+        if (liftRef.current >= 1) {
+          liftDoneRef.current = true;
+          onLiftDoneRef.current?.();
+        }
+      }
+
       rendererRef.current.draw(ctx, w, h, {
         state,
-        toolX: drag.down ? drag.pos.x : null,
-        toolY: drag.down ? drag.pos.y : null,
+        toolX: drag.down && !lifting ? drag.pos.x : null,
+        toolY: drag.down && !lifting ? drag.pos.y : null,
         toolRadius: tool.radius,
         toolKind: tool.kind as 'scoop' | 'brush' | 'pick' | 'pinpointer',
+        toolVX,
+        toolVY,
         particles: particlesRef.current,
         time: elapsed,
         damageFlash: flashRef.current,
         heat: hasPinpointer && drag.down ? heatAt(state, drag.pos.x, drag.pos.y) : null,
         shake: shakeRef.current,
+        ground: location.ground,
+        lift: liftRef.current,
       });
 
       hudTick += dt;
@@ -197,7 +226,7 @@ export function ExcavateScreen() {
           ) {
             return prev;
           }
-          return { condition, exposed, ready, cleared, hasObject: state.hasObject };
+          return { condition, exposed, ready, cleared, hasObject: state.hasObject, lifting: prev.lifting };
         });
       }
     });
@@ -214,19 +243,28 @@ export function ExcavateScreen() {
 
   const onExtract = () => {
     const state = stateRef.current;
-    if (!state || !def || !canExtract(state)) return;
+    if (!state || !def || !canExtract(state) || liftRef.current > 0) return;
     const condition = extract(state);
-    audio.reveal(def.rarity === 'rare' || def.rarity === 'veryRare' || def.rarity === 'legendary');
+    const big = def.rarity === 'rare' || def.rarity === 'veryRare' || def.rarity === 'legendary';
+    audio.lift();
     haptics.reveal();
-    if (dig.targetUid) markTargetDug(dig.targetUid);
-    recordHole(dig.digX, dig.digY, true);
-    completeExtraction({
-      def,
-      condition,
-      depthCm: dig.depthCm,
-      locationId: dig.locationId,
-      ...(dig.tutorial ? { tutorial: true } : {}),
-    });
+    setHud((prev) => ({ ...prev, lifting: true }));
+    // The object rises out of the hole first; the reveal chord lands as it
+    // comes clear. Nothing is committed until then, so a lift cut short
+    // leaves the find in the ground rather than losing it.
+    onLiftDoneRef.current = () => {
+      if (dig.targetUid) markTargetDug(dig.targetUid);
+      recordHole(dig.digX, dig.digY, true);
+      audio.reveal(big);
+      completeExtraction({
+        def,
+        condition,
+        depthCm: dig.depthCm,
+        locationId: dig.locationId,
+        ...(dig.tutorial ? { tutorial: true } : {}),
+      });
+    };
+    liftRef.current = 0.0001;
   };
 
   const onGiveUp = () => {
@@ -240,14 +278,14 @@ export function ExcavateScreen() {
   const tool = getTool(toolId);
 
   return (
-    <div className="screen screen--world" ref={hostRef}>
+    <div className={`screen screen--world screen--pit ${hud.lifting ? 'screen--lifting' : ''}`} ref={hostRef}>
       <canvas ref={canvasRef} className="world" data-testid="pit-canvas" />
 
       <div className="world-ui">
         <div className="world-top">
           <div className="chip">{location.name} · dig</div>
           <div style={{ flex: 1 }} />
-          <Btn small variant="ghost" sound="back" onClick={onGiveUp} data-testid="leave-dig">
+          <Btn small variant="ghost" sound="back" onClick={onGiveUp} disabled={hud.lifting} data-testid="leave-dig">
             {hud.hasObject ? 'Fill in' : 'Give up'}
           </Btn>
         </div>
@@ -285,8 +323,12 @@ export function ExcavateScreen() {
         </div>
 
         <div className="world-bottom">
-          {hud.hasObject && hud.exposed > 0.18 && hud.exposed < 0.7 ? (
+          {hud.lifting ? (
+            <div className="notice">Gently…</div>
+          ) : hud.hasObject && hud.exposed > 0.18 && hud.exposed < 0.7 ? (
             <div className="notice">An edge. Use the brush from here.</div>
+          ) : firstDig && hud.exposed < 0.05 && hud.cleared < 0.08 ? (
+            <div className="notice">Drag across the dirt to scoop it away.</div>
           ) : null}
 
           <div className="row" data-ui="true" style={{ gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -322,12 +364,12 @@ export function ExcavateScreen() {
               <Btn
                 variant="primary"
                 wide
-                disabled={!hud.ready}
+                disabled={!hud.ready || hud.lifting}
                 onClick={onExtract}
                 data-testid="extract"
                 sound="none"
               >
-                {hud.ready ? 'Lift it out' : `Uncover it (${Math.round(hud.exposed * 100)}%)`}
+                {hud.lifting ? 'Lifting…' : hud.ready ? 'Lift it out' : `Uncover it (${Math.round(hud.exposed * 100)}%)`}
               </Btn>
             )}
           </div>

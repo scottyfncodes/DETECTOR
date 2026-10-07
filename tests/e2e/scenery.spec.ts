@@ -53,8 +53,8 @@ test('a field scenery clue is found by looking, not digging', async ({ page }) =
 
   const readPromptLabel = () =>
     page.evaluate(() => {
-      const hook = (window as unknown as { __unearth?: { frames: { explore?: { promptLabel: string | null } } } })
-        .__unearth;
+      const hook = (window as unknown as { __detector?: { frames: { explore?: { promptLabel: string | null } } } })
+        .__detector;
       return hook?.frames.explore?.promptLabel ?? null;
     });
 
@@ -76,8 +76,8 @@ test('a field scenery clue is found by looking, not digging', async ({ page }) =
   await expect(page.getByTestId('discovery-name')).toBeVisible();
 
   const save = await page.evaluate(() => {
-    const hook = (window as unknown as { __unearth?: { state: () => { save: { discoveries: { targetId: string }[] } } } })
-      .__unearth;
+    const hook = (window as unknown as { __detector?: { state: () => { save: { discoveries: { targetId: string }[] } } } })
+      .__detector;
     return hook?.state().save ?? null;
   });
   expect(save?.discoveries.some((d) => d.targetId === 'tgt_park_marker')).toBe(true);

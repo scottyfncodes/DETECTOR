@@ -13,7 +13,7 @@ export interface FieldTarget {
 /** Reads the live game state through the opt-in debug hook. */
 export async function readState(page: Page) {
   return page.evaluate(() => {
-    const hook = (window as unknown as { __unearth?: { state: () => unknown } }).__unearth;
+    const hook = (window as unknown as { __detector?: { state: () => unknown } }).__detector;
     return hook ? (hook.state() as Record<string, unknown>) : null;
   });
 }
@@ -25,7 +25,7 @@ export async function readSave(page: Page) {
 
 export async function readDetectorFrame(page: Page) {
   return page.evaluate(() => {
-    const hook = (window as unknown as { __unearth?: { frames: { detector?: unknown } } }).__unearth;
+    const hook = (window as unknown as { __detector?: { frames: { detector?: unknown } } }).__detector;
     return (hook?.frames.detector ?? null) as {
       x: number;
       y: number;
@@ -41,7 +41,7 @@ export async function readDetectorFrame(page: Page) {
 
 export async function readExploreFrame(page: Page) {
   return page.evaluate(() => {
-    const hook = (window as unknown as { __unearth?: { frames: { explore?: unknown } } }).__unearth;
+    const hook = (window as unknown as { __detector?: { frames: { explore?: unknown } } }).__detector;
     return (hook?.frames.explore ?? null) as { x: number; z: number; yaw: number; promptLabel: string | null } | null;
   });
 }

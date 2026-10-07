@@ -1,4 +1,4 @@
-/* UNEARTH — restrained, earthy, tactile. Dark by default; the ground is the star. */
+/* DETECTOR — restrained, earthy, tactile. Dark by default; the ground is the star. */
 :root {
   --bg: #0e1210;
   --bg-deep: #080a09;
@@ -1063,6 +1063,36 @@ button {
   }
 }
 
+/* The field you're partway through: a loose pencil loop round the dot,
+   the way you'd circle a spot on a paper map. It marks a place, not a score. */
+.marker__dot {
+  position: relative;
+}
+
+.marker__pencil {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 26px;
+  margin: -13px 0 0 -15px;
+  border: 1.4px solid rgba(58, 46, 30, 0.75);
+  border-radius: 52% 48% 55% 45% / 50% 56% 44% 50%;
+  transform: rotate(-12deg);
+  animation: pencilBreathe 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pencilBreathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .marker__label {
   font-size: 12.5px;
   letter-spacing: 0.01em;
@@ -1206,4 +1236,22 @@ button {
   fill: var(--text);
   font-family: var(--serif);
   font-size: 10.5px;
+}
+
+/* ── kneeling into a dig ───────────────────────────────────────────────── */
+/* The camera does the moving (it drops and looks down); this is just the
+   light going as you lean into the hole. Opacity only, as everywhere. */
+.kneel-fade {
+  position: absolute;
+  inset: 0;
+  background: #050604;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.36s ease-in;
+  z-index: 5;
+}
+
+.kneel-fade--on {
+  opacity: 1;
+  pointer-events: auto;
 }
