@@ -8,7 +8,7 @@
 import { getLocation } from '@/content/locations';
 import { getDetector, getTool } from '@/content/equipment';
 import { getTarget } from '@/content/targets';
-import { generateField } from '@/systems/placement';
+import { generateField, seedCaches } from '@/systems/placement';
 import {
   resolveDiscovery,
   resolveObservation,
@@ -214,16 +214,32 @@ export function enterLocation(locationId: string, forceNew = false): FieldState 
     existing.locationId === locationId &&
     existing.targets.some((t) => !t.dug);
 
+  const discovered = save.discoveries.map((d) => d.targetId);
   const field = reusable
-    ? existing!
+    ? { ...existing!, targets: [...existing!.targets] }
     : generateField(loc, randomSeed(), {
         heldClues: save.clues,
         includeTutorial: !save.flags.tutorialFound && loc.table.length > 0,
+        discovered,
       });
+  // What the player has learned since they were last here changes the ground.
+  if (reusable) seedCaches(field, loc, save.clues, discovered);
 
   game.update((s) => ({ ...s, save: { ...s.save, field }, activeSite: null, route: 'explore3d', notice: null }));
   schedulePersist();
   return field;
+}
+
+/**
+ * Whether a cache the player now knows about lies in a location — the map
+ * uses this to say, in words, that a place is worth going back to.
+ */
+export function knownCachesAt(locationId: string): number {
+  const save = game.get().save;
+  const loc = getLocation(locationId);
+  if (!loc) return 0;
+  const discovered = save.discoveries.map((d) => d.targetId);
+  return (loc.caches ?? []).filter((c) => save.clues.includes(c.requiresClue) && !discovered.includes(c.targetId)).length;
 }
 
 export function currentField(): FieldState | null {

@@ -64,6 +64,8 @@ export interface SiteInteractable {
   scale?: [number, number, number];
   /** For 'observe' / 'pickup' / 'notice': the TargetDef this grants. */
   targetId?: string;
+  /** For 'pickup': a found tool (content/equipment.ts, `found: true`) this also hands over. */
+  grantsEquipment?: string;
   /** For 'fit': the target id that must already be discovered to enable this. */
   requiresTargetId?: string;
   /** Interactable only appears/works once this site-progress flag is set. */

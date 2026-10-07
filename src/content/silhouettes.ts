@@ -263,6 +263,31 @@ export const SILHOUETTES: Record<string, Silhouette> = {
   },
 };
 
+/* The Surveyor's trail */
+SILHOUETTES.page = {
+  shapes: [{ kind: 'rect', x: 0, y: 0, w: 1.2, h: 1.6, rot: 0.08 }],
+  finish: 'painted',
+  detail: 'engraved',
+};
+SILHOUETTES.surveyTin = {
+  shapes: [{ kind: 'rect', x: 0, y: 0, w: 1.6, h: 1.0, rot: -0.1 }, { kind: 'rect', x: 0, y: -0.45, w: 1.5, h: 0.14, rot: -0.1 }],
+  finish: 'iron',
+  detail: 'sunmark',
+};
+SILHOUETTES.plumb = {
+  shapes: [
+    { kind: 'circle', x: 0, y: -0.55, r: 0.2 },
+    { kind: 'poly', pts: [[-0.42, -0.35], [0.42, -0.35], [0.42, 0.2], [0, 0.95], [-0.42, 0.2]] },
+  ],
+  finish: 'brass',
+  detail: 'thread',
+};
+SILHOUETTES.leadCase = {
+  shapes: [{ kind: 'rect', x: 0, y: 0, w: 1.3, h: 1.7 }, { kind: 'rect', x: 0, y: -0.6, w: 1.4, h: 0.2 }],
+  finish: 'alloy',
+  detail: 'sunmark',
+};
+
 export function getSilhouette(id: string): Silhouette {
   return SILHOUETTES[id] ?? SILHOUETTES.oddity!;
 }

@@ -157,14 +157,14 @@ export function JournalScreen() {
           )
         ) : tab === 'mysteries' ? (
           <>
-            {progress.map((p) => (
+            {progress.filter((p) => p.held.length > 0).map((p) => (
               <div key={p.chain.id} className="panel" style={{ marginBottom: 12 }}>
                 <div className="row row--between">
                   <strong className="serif" style={{ fontSize: 17 }}>
                     {p.held.length === 0 ? 'Unidentified pattern' : p.chain.name}
                   </strong>
-                  <span className="label">
-                    {p.held.length}/{p.chain.clueIds.length}
+                  <span className="label" style={{ color: p.complete ? 'var(--gold)' : undefined }}>
+                    {p.complete ? 'Resolved' : p.held.length ? 'Open' : ''}
                   </span>
                 </div>
                 <p className="card__sub" style={{ marginTop: 6 }}>
@@ -184,11 +184,16 @@ export function JournalScreen() {
                     <p className="card__sub" style={{ margin: '4px 0 0' }}>
                       {clue.text}
                     </p>
+                    {clue.pointsTo ? (
+                      <p className="tiny" style={{ margin: '6px 0 0', color: 'var(--gold)' }}>
+                        Names a place: {save.unlockedLocations.includes(clue.pointsTo) || !getLocation(clue.pointsTo)?.lockedBy ? getLocation(clue.pointsTo)?.name : 'somewhere you have not reached'}
+                      </p>
+                    ) : null}
                   </div>
                 ))}
                 {!p.complete && p.held.length > 0 ? (
-                  <p className="tiny" style={{ marginTop: 10 }}>
-                    {p.missing} more piece{p.missing === 1 ? '' : 's'} needed.
+                  <p className="tiny" style={{ marginTop: 10, fontStyle: 'italic' }}>
+                    Something is still missing.
                   </p>
                 ) : null}
               </div>
@@ -343,9 +348,8 @@ function AssembleTab({
               Fit the pieces together
             </Btn>
           ) : (
-            <p className="tiny" style={{ marginTop: 12 }}>
-              {progress.totalCount - progress.heldCount} more piece
-              {progress.totalCount - progress.heldCount === 1 ? '' : 's'} needed.
+            <p className="tiny" style={{ marginTop: 12, fontStyle: 'italic' }}>
+              {progress.totalCount - progress.heldCount === 1 ? 'One edge still does not meet anything.' : 'The outline does not close yet.'}
             </p>
           )}
         </div>

@@ -8,6 +8,7 @@
  */
 import { getClue } from '@/content/clues';
 import { getLocation } from '@/content/locations';
+import { getTool } from '@/content/equipment';
 import type {
   ClueDef,
   DiscoveryRecord,
@@ -15,6 +16,7 @@ import type {
   MysteryChain,
   SaveData,
   TargetDef,
+  ToolDef,
 } from '@/core/types';
 import { newlyCompleted } from './mystery';
 import { uid } from '@/core/rng';
@@ -40,6 +42,27 @@ export interface DiscoveryOutcome {
   /** First time this kind of object has ever been found. */
   firstOfKind: boolean;
   fundsGained: number;
+  /** A found tool that came with the find (the surveyor's compass). */
+  equipmentGained: ToolDef | null;
+}
+
+/**
+ * How big a moment a discovery is. The contrast matters: a bottle cap gets
+ * a glance, a clue gets a held breath, a completed chain gets the room.
+ *
+ *  minor   — common, no clue: in and out.
+ *  notable — a real find, nothing to connect yet.
+ *  major   — a clue, a connection, a very rare object, or a new tool.
+ *  event   — a chain completes, somewhere unlocks, or a legendary comes up.
+ */
+export type DiscoveryTier = 'minor' | 'notable' | 'major' | 'event';
+
+export function discoveryTier(outcome: DiscoveryOutcome): DiscoveryTier {
+  if (outcome.chains.length || outcome.unlockedLocations.length || outcome.def.rarity === 'legendary') return 'event';
+  if (outcome.clue || outcome.connections.length || outcome.def.rarity === 'veryRare' || outcome.equipmentGained) return 'major';
+  if (outcome.def.rarity === 'common' && !outcome.firstOfKind) return 'minor';
+  if (outcome.def.rarity === 'common' && outcome.def.category === 'junk') return 'minor';
+  return 'notable';
 }
 
 /**
@@ -52,8 +75,11 @@ export function applyDiscoveryRecord(
   save: SaveData,
   record: DiscoveryRecord,
   def: TargetDef,
+  grantsEquipment?: string,
 ): { save: SaveData; outcome: DiscoveryOutcome } {
   const firstOfKind = !save.discoveries.some((d) => d.targetId === def.id);
+  const tool = grantsEquipment ? getTool(grantsEquipment) ?? null : null;
+  const equipmentGained = tool && !save.ownedEquipment.includes(tool.id) ? tool : null;
 
   const clue = def.clueId ? (getClue(def.clueId) ?? null) : null;
   const isNewClue = !!clue && !save.clues.includes(clue.id);
@@ -94,6 +120,7 @@ export function applyDiscoveryRecord(
     chainsComplete: chains.length ? [...save.chainsComplete, ...chains.map((c) => c.id)] : save.chainsComplete,
     unlockedLocations: unlocked,
     adventures,
+    ownedEquipment: equipmentGained ? [...save.ownedEquipment, equipmentGained.id] : save.ownedEquipment,
     money: save.money + record.value,
     stats: {
       ...save.stats,
@@ -118,6 +145,7 @@ export function applyDiscoveryRecord(
       unlockedAdventures,
       firstOfKind,
       fundsGained: record.value,
+      equipmentGained,
     },
   };
 }
@@ -147,6 +175,8 @@ export function resolveDiscovery(
 export interface ObservationInput {
   def: TargetDef;
   locationId: string;
+  /** A found tool handed over with the find. */
+  grantsEquipment?: string;
 }
 
 /**
@@ -169,7 +199,7 @@ export function resolveObservation(
     foundAt: Date.now(),
     value: def.value,
   };
-  return applyDiscoveryRecord(save, record, def);
+  return applyDiscoveryRecord(save, record, def, input.grantsEquipment);
 }
 
 export function conditionLabel(condition: number): string {

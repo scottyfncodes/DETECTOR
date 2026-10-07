@@ -71,18 +71,23 @@ export function EquipmentScreen() {
           );
         })}
 
-        <div className="group-heading">Excavation tools</div>
-        {TOOLS.map((tool) => {
+        <div className="group-heading">Tools</div>
+        {TOOLS.filter((tool) => !tool.found || save.ownedEquipment.includes(tool.id)).map((tool) => {
           const owned = save.ownedEquipment.includes(tool.id);
           const affordable = save.money >= tool.price;
           return (
-            <div key={tool.id} className="card">
+            <div key={tool.id} className="card" data-testid={`tool-${tool.id}`}>
               <div className="row row--between">
                 <div style={{ minWidth: 0 }}>
                   <h3 className="card__title">{tool.name}</h3>
                   <p className="card__sub">{tool.tagline}</p>
+                  {tool.found && tool.reveals ? (
+                    <p className="tiny" style={{ marginTop: 6, color: 'var(--gold)' }}>
+                      {tool.reveals}
+                    </p>
+                  ) : null}
                 </div>
-                {owned ? <span className="label">Owned</span> : null}
+                {owned ? <span className="label" style={tool.found ? { color: 'var(--gold)' } : undefined}>{tool.found ? 'Found' : 'Owned'}</span> : null}
               </div>
               {!owned ? (
                 <div style={{ marginTop: 12 }}>

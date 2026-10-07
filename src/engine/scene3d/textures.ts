@@ -49,22 +49,6 @@ export function stoneTexture(): THREE.CanvasTexture {
   return toTexture(stoneCanvas, [1.6, 1.6]);
 }
 
-export function skyGradientTexture(top: string, bottom: string): THREE.CanvasTexture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 8;
-  canvas.height = 256;
-  const ctx = canvas.getContext('2d')!;
-  const grad = ctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, top);
-  grad.addColorStop(1, bottom);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 8, 256);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.needsUpdate = true;
-  return tex;
-}
-
 /** The exact 2D find-art renderer, baked onto a square sprite for the 3D world. */
 export function findSprite(silhouette: string, size = 256): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');

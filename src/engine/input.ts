@@ -165,7 +165,9 @@ export class LookController {
       const dx = e.clientX - this.last.x;
       const dy = e.clientY - this.last.y;
       this.last = { x: e.clientX, y: e.clientY };
-      this.yawDelta -= dx * this.sensitivity;
+      // Yaw is a clockwise compass bearing (see systems/survey.ts): dragging
+      // right turns right, which is a larger bearing.
+      this.yawDelta += dx * this.sensitivity;
       this.pitchDelta -= dy * this.sensitivity;
     };
 

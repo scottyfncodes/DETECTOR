@@ -6,7 +6,9 @@
 import * as THREE from 'three';
 import type { PropKind, SiteDef, SiteInteractable, SiteProp } from '@/content/sites/types';
 import { PROP_FOOTPRINT } from '@/systems/explore';
-import { findSprite, footprintsTexture, hazardDecalTexture, siteGroundTexture, skyGradientTexture, stoneTexture } from './textures';
+import { ATMOSPHERE, buildSky, type SkyRig } from './atmosphere';
+import { buildGrass, type GrassField } from './grass';
+import { findSprite, footprintsTexture, hazardDecalTexture, siteGroundTexture, stoneTexture } from './textures';
 
 export const PROP_HEIGHT: Record<PropKind, number> = {
   wall: 2.6,
@@ -28,38 +30,54 @@ export interface BuiltSite {
   scene: THREE.Scene;
   /** Interactable id -> its mesh, for visibility toggling as flags change. */
   interactableMeshes: Map<string, THREE.Object3D>;
+  sky: SkyRig;
+  /** Per-frame motion: clouds, grass, any running rise. */
+  update(dt: number, elapsed: number): void;
+  /**
+   * Raises an interactable's mesh out of the ground over `seconds` — the
+   * pedestal that was under the dais the whole time. Returns a promise that
+   * resolves when it is fully up.
+   */
+  rise(interactableId: string, depth: number, seconds: number): Promise<void>;
   dispose(): void;
 }
 
 export function buildSiteScene(site: SiteDef): BuiltSite {
   const scene = new THREE.Scene();
+  const atmo = ATMOSPHERE[site.ambience ?? 'ruins'];
+  const sky = buildSky(scene, atmo, site.radius, { skyTop: site.skyTop, skyBottom: site.skyBottom, fog: site.fogColor });
   scene.fog = new THREE.Fog(new THREE.Color(site.fogColor).getHex(), site.fogNear, site.fogFar);
 
-  const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(320, 16, 12),
-    new THREE.MeshBasicMaterial({ map: skyGradientTexture(site.skyTop, site.skyBottom), side: THREE.BackSide, fog: false }),
-  );
-  scene.add(sky);
-
-  scene.add(new THREE.HemisphereLight(new THREE.Color(site.skyTop), new THREE.Color(site.groundColor), 1.0));
-  const sun = new THREE.DirectionalLight(0xfff1d6, 1.1);
-  sun.position.set(-9, 15, 7);
-  scene.add(sun);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.16));
-
-  const groundSize = site.radius * 2.6;
+  const groundSize = site.radius * 2.6 + 30;
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(groundSize, groundSize),
     new THREE.MeshStandardMaterial({
-      map: siteGroundTexture(site.groundColor, site.groundDetail, Math.max(4, Math.round(site.radius / 2))),
+      map: siteGroundTexture(site.groundColor, site.groundDetail, Math.max(4, Math.round(groundSize / 4))),
       roughness: 1,
     }),
   );
   ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
   scene.add(ground);
 
   const stoneMaterial = new THREE.MeshStandardMaterial({ map: stoneTexture(), roughness: 0.96, metalness: 0.02 });
   for (const prop of site.props) buildProp(scene, prop, stoneMaterial);
+
+  const grass: GrassField | null =
+    site.ambience === 'ruins' || site.ambience === 'park'
+      ? buildGrass({
+          count: 900,
+          halfWidth: site.radius + 8,
+          halfHeight: site.radius + 8,
+          terrain: null,
+          color: '#536b3c',
+          tip: '#b3bf78',
+          height: 0.26,
+          seed: 0x5173,
+          avoid: [{ x: site.spawn.x, z: site.spawn.z, r: 1.2 }, ...site.props.filter((p) => p.kind === 'stairStep' || p.kind === 'statueBody').map((p) => ({ x: p.position.x, z: p.position.z, r: 1.6 }))],
+        })
+      : null;
+  if (grass) scene.add(grass.mesh);
 
   const interactableMeshes = new Map<string, THREE.Object3D>();
   for (const it of site.interactables) {
@@ -69,6 +87,8 @@ export function buildSiteScene(site: SiteDef): BuiltSite {
       interactableMeshes.set(it.id, mesh);
     }
   }
+
+  const rises: { obj: THREE.Object3D; from: number; to: number; t: number; seconds: number; done: () => void }[] = [];
 
   for (const hz of site.hazards) {
     const decal = new THREE.Mesh(
@@ -83,7 +103,35 @@ export function buildSiteScene(site: SiteDef): BuiltSite {
   return {
     scene,
     interactableMeshes,
-    dispose: () => disposeObject(scene),
+    sky,
+    update(dt, elapsed) {
+      sky.update(dt, elapsed);
+      grass?.update(elapsed);
+      for (let i = rises.length - 1; i >= 0; i--) {
+        const r = rises[i]!;
+        r.t = Math.min(r.seconds, r.t + dt);
+        const k = r.t / r.seconds;
+        const eased = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        r.obj.position.y = r.from + (r.to - r.from) * eased;
+        if (r.t >= r.seconds) {
+          rises.splice(i, 1);
+          r.done();
+        }
+      }
+    },
+    rise(interactableId, depth, seconds) {
+      const obj = interactableMeshes.get(interactableId);
+      if (!obj) return Promise.resolve();
+      obj.visible = true;
+      const to = obj.position.y;
+      obj.position.y = to - depth;
+      return new Promise<void>((done) => rises.push({ obj, from: to - depth, to, t: 0, seconds, done }));
+    },
+    dispose: () => {
+      sky.dispose();
+      grass?.dispose();
+      disposeObject(scene);
+    },
   };
 }
 
@@ -172,6 +220,13 @@ export function buildProp(scene: THREE.Scene, prop: SiteProp, stoneMaterial: THR
     }
   }
 
+  group.traverse((obj) => {
+    const m = obj as THREE.Mesh;
+    if (m.isMesh) {
+      m.castShadow = prop.kind !== 'stairStep';
+      m.receiveShadow = true;
+    }
+  });
   scene.add(group);
 }
 
@@ -229,9 +284,13 @@ function buildInteractable(it: SiteInteractable): THREE.Object3D | null {
     }
     case 'relicPedestal': {
       const stoneMat = new THREE.MeshStandardMaterial({ map: stoneTexture(), roughness: 0.95 });
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.8, 10), stoneMat);
-      base.position.y = 0.4;
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 2.0, 10), stoneMat);
+      base.position.y = -0.2;
+      base.castShadow = true;
       group.add(base);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.36, 0.12, 10), stoneMat);
+      cap.position.y = 0.82;
+      group.add(cap);
       const idol = billboardMesh(findSprite('serpentIdol'), 0.5);
       idol.position.y = 0.95;
       group.add(idol);

@@ -18,6 +18,8 @@ export interface PlacementContext {
   heldClues: string[];
   /** Insert the first-run teaching target. */
   includeTutorial: boolean;
+  /** Target ids already in the journal — a found cache is never seeded twice. */
+  discovered?: string[];
 }
 
 export function generateField(
@@ -58,7 +60,7 @@ export function generateField(
 
   ensureSomethingWorthFinding(rng, location, placed, ctx.heldClues);
 
-  return {
+  const field: FieldState = {
     locationId: location.id,
     seed,
     targets: placed,
@@ -67,6 +69,47 @@ export function generateField(
     holes: [],
     startedAt: Date.now(),
   };
+  seedCaches(field, location, ctx.heldClues, ctx.discovered ?? []);
+  return field;
+}
+
+/**
+ * Knowledge changes the ground. A cache is an authored buried find at a
+ * fixed spot that only exists in the field once the player holds the clue
+ * pointing at it — so a place already searched clean becomes worth walking
+ * again the moment a page names it. Safe to call repeatedly: a cache already
+ * seeded, or already in the journal, is left alone. Returns what was added.
+ */
+export function seedCaches(
+  field: FieldState,
+  location: LocationDef,
+  heldClues: readonly string[],
+  discovered: readonly string[],
+): PlacedTarget[] {
+  const added: PlacedTarget[] = [];
+  for (const cache of location.caches ?? []) {
+    if (!heldClues.includes(cache.requiresClue)) continue;
+    if (discovered.includes(cache.targetId)) continue;
+    if (field.targets.some((t) => t.cacheId === cache.id)) continue;
+    if (!getTarget(cache.targetId)) continue;
+    // Anything rolled onto the cache's spot gives way — the cache was always there.
+    field.targets = field.targets.filter(
+      (t) => t.cacheId || Math.hypot(t.x - cache.x, t.y - cache.y) >= MIN_SEPARATION * 0.6,
+    );
+    const placed: PlacedTarget = {
+      uid: `cache_${cache.id}`,
+      targetId: cache.targetId,
+      x: cache.x,
+      y: cache.y,
+      depth: cache.depthCm,
+      baseCondition: cache.baseCondition,
+      dug: false,
+      cacheId: cache.id,
+    };
+    field.targets.push(placed);
+    added.push(placed);
+  }
+  return added;
 }
 
 function buildPool(

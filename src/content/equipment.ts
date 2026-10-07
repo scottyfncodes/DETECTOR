@@ -104,6 +104,18 @@ export const TOOLS: ToolDef[] = [
     price: 160,
   },
   {
+    id: 'tool_compass',
+    name: "Surveyor's Compass",
+    kind: 'compass',
+    tagline: 'Found, not bought. Every bearing in your journal is a direction you can now actually walk.',
+    power: 0,
+    risk: 0,
+    radius: 0,
+    price: 0,
+    found: true,
+    reveals: 'Bearings. The heading strip appears at the top of the world while you carry it.',
+  },
+  {
     id: 'tool_pinpointer',
     name: 'Pinpointer',
     kind: 'pinpointer',

@@ -129,9 +129,92 @@ export interface LocationDef {
   /**
    * Fixed, always-visible surface details found by looking rather than
    * digging — the OBSERVE half of the field alongside the detector's SEARCH.
-   * Unlike a dug-up find these need no gating: walk up, look, done.
+   * Most need no gating: walk up, look, done. A few only make sense once
+   * you know something (see SceneryClue.requiresClue).
    */
   sceneryClues?: SceneryClue[];
+  /**
+   * Authored, memorable features of the ground: the dead oak, the signal
+   * box, the headframe. They are navigation (a bearing has to be taken
+   * FROM somewhere), environmental storytelling (walk up and look closer),
+   * and the skeleton the whole field is dressed around.
+   */
+  landmarks?: LandmarkDef[];
+  /**
+   * Knowledge-gated buried finds. A cache sits at a fixed spot and is only
+   * ever seeded into the ground once the player holds the clue that points
+   * at it — the ground has not changed, but what the player knows has.
+   */
+  caches?: CacheDef[];
+  /** Where this place sits on the survey map, 0..1 across the sheet. */
+  map: { x: number; y: number };
+}
+
+export type LandmarkKind =
+  | 'deadOak'
+  | 'tree'
+  | 'pine'
+  | 'bench'
+  | 'lampPost'
+  | 'ironFence'
+  | 'pond'
+  | 'path'
+  | 'dedicationStone'
+  | 'rails'
+  | 'bufferStop'
+  | 'signalBox'
+  | 'waterTower'
+  | 'sleeperPile'
+  | 'wreckedCart'
+  | 'headframe'
+  | 'spoilHeap'
+  | 'tunnelMouth'
+  | 'cliffWall'
+  | 'timberFrame'
+  | 'boulder';
+
+/** A notice attached to a landmark: look closer, read a line, remember it. */
+export interface LandmarkNotice {
+  prompt: string;
+  text: string;
+  /** Added to save.siteProgress on use; the prompt disappears after. */
+  flag: string;
+  /** Alternate line once the landmark is in its `open` state. */
+  openText?: string;
+  openFlag?: string;
+}
+
+export interface LandmarkDef {
+  id: string;
+  kind: LandmarkKind;
+  /** Position within the plot, centimetres — the same space as PlacedTarget. */
+  x: number;
+  y: number;
+  /** Radians. */
+  rotation?: number;
+  scale?: number;
+  /** Shown in the HUD chip when standing nearby. */
+  name?: string;
+  notice?: LandmarkNotice;
+  /**
+   * A landmark can change state once the player knows enough: a boarded
+   * adit stands open once either chain is complete. The builder for each
+   * kind decides what "open" looks like.
+   */
+  openWhen?: { chains?: string[]; flags?: string[] };
+  /** How close the player must stand for the notice, in metres. */
+  range?: number;
+}
+
+export interface CacheDef {
+  id: string;
+  targetId: string;
+  x: number;
+  y: number;
+  depthCm: number;
+  baseCondition: number;
+  /** The clue that makes this spot worth going to. Seeded only once held. */
+  requiresClue: string;
 }
 
 /** A surface-level, look-don't-dig find fixed at one spot in a detecting field. */
@@ -146,6 +229,10 @@ export interface SceneryClue {
   range: number;
   /** The TargetDef this grants on use — its own `silhouette` draws the in-world sprite. */
   targetId: string;
+  /** If set, the clue is not offered (and not drawn) until the player holds this clue. */
+  requiresClue?: string;
+  /** If set, this clue is drawn as part of that landmark rather than as a standalone sprite. */
+  landmarkId?: string;
 }
 
 export interface GroundPalette {
@@ -168,6 +255,11 @@ export interface ClueDef {
   symbol: string;
   title: string;
   text: string;
+  /**
+   * A clue that names a place, even one the player cannot enter yet. The
+   * survey map draws what is known: a pencil line toward it, and where.
+   */
+  pointsTo?: string;
 }
 
 export interface MysteryChain {
@@ -181,6 +273,8 @@ export interface MysteryChain {
   completeText: string;
   unlocksLocation?: string;
   unlocksAdventure?: string;
+  /** Places this chain ties together, drawn on the map once it completes. */
+  links?: string[];
 }
 
 export interface DetectorDef {
@@ -203,7 +297,7 @@ export interface DetectorDef {
 export interface ToolDef {
   id: string;
   name: string;
-  kind: 'scoop' | 'brush' | 'pick' | 'pinpointer';
+  kind: 'scoop' | 'brush' | 'pick' | 'pinpointer' | 'compass';
   tagline: string;
   /** Dirt removed per unit of drag. */
   power: number;
@@ -212,6 +306,10 @@ export interface ToolDef {
   /** Effective radius in excavation pixels. */
   radius: number;
   price: number;
+  /** Found in the world, never bought: the kit screen only shows it once held. */
+  found?: boolean;
+  /** What holding it lets the player read that they could not before. */
+  reveals?: string;
 }
 
 /** A target that has actually been placed in the ground for this session. */
@@ -227,6 +325,8 @@ export interface PlacedTarget {
   baseCondition: number;
   dug: boolean;
   tutorial?: boolean;
+  /** Set when this target was seeded from a LocationDef cache, not rolled. */
+  cacheId?: string;
 }
 
 export interface FieldState {

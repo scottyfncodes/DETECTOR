@@ -49,8 +49,68 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_shard_b', weight: 2.2 },
       { targetId: 'tgt_shard_c', weight: 1.6 },
     ],
+    map: { x: 0.3, y: 0.68 },
     sceneryClues: [
-      { id: 'clue_park_marker', prompt: 'Look closer', x: 260, y: 980, range: 3, targetId: 'tgt_park_marker' },
+      {
+        id: 'clue_park_marker',
+        prompt: 'Look closer',
+        x: 1150,
+        y: 1100,
+        range: 3,
+        targetId: 'tgt_park_marker',
+        landmarkId: 'park_stone',
+      },
+    ],
+    landmarks: [
+      { id: 'park_path', kind: 'path', x: 700, y: 760, rotation: 0.55, scale: 1.6 },
+      {
+        id: 'park_oak',
+        kind: 'deadOak',
+        x: 330,
+        y: 380,
+        rotation: 0.4,
+        scale: 1.15,
+        name: 'The dead oak',
+        range: 3.2,
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'Initials cut into the bark, decades of them, one over another. Lower down, older than any of the initials and cut deeper: a small circle with three short lines coming off it.',
+          flag: 'park_oak_seen',
+        },
+      },
+      { id: 'park_stone', kind: 'dedicationStone', x: 1150, y: 1100, rotation: -0.3, name: 'The dedication stone' },
+      { id: 'park_pond', kind: 'pond', x: 420, y: 1000, scale: 1.2, name: 'The pond' },
+      { id: 'park_bench_a', kind: 'bench', x: 900, y: 1200, rotation: 0.2 },
+      { id: 'park_bench_b', kind: 'bench', x: 1190, y: 600, rotation: -1.4 },
+      { id: 'park_lamp_a', kind: 'lampPost', x: 560, y: 1260 },
+      { id: 'park_lamp_b', kind: 'lampPost', x: 1260, y: 300 },
+      { id: 'park_fence_n', kind: 'ironFence', x: 700, y: 50, scale: 2.3 },
+      { id: 'park_fence_e', kind: 'ironFence', x: 1350, y: 700, rotation: Math.PI / 2, scale: 2.3 },
+      { id: 'park_tree_a', kind: 'tree', x: 120, y: 700, scale: 1.1 },
+      { id: 'park_tree_b', kind: 'tree', x: 1320, y: 1320, scale: 0.9 },
+      { id: 'park_tree_c', kind: 'tree', x: 1000, y: 1330, scale: 1.2 },
+      { id: 'park_tree_d', kind: 'tree', x: 180, y: 1290, scale: 0.85 },
+      {
+        id: 'park_bandstand_bench',
+        kind: 'bench',
+        x: 880,
+        y: 1010,
+        rotation: 1.2,
+        name: 'A bench by the pond',
+        range: 2.6,
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'A brass plaque on the backrest, polished by a century of coats. "For those who looked up." Under it, scratched rather than engraved, a bearing: 312.',
+          flag: 'park_bench_seen',
+        },
+      },
+    ],
+    caches: [
+      // Bearing 312° from the dedication stone, eight metres on — exactly
+      // where the surveyor's first page says to look.
+      { id: 'cache_park_tin', targetId: 'tgt_survey_tin', x: 556, y: 565, depthCm: 16, baseCondition: 74, requiresClue: 'clue_surveyor_1' },
     ],
   },
   {
@@ -99,8 +159,74 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_shard_b', weight: 1.8 },
       { targetId: 'tgt_shard_c', weight: 2.4 },
     ],
+    map: { x: 0.62, y: 0.8 },
     sceneryClues: [
-      { id: 'clue_railway_plate', prompt: 'Look closer', x: 1180, y: 380, range: 3, targetId: 'tgt_railway_plate' },
+      {
+        id: 'clue_railway_plate',
+        prompt: 'Look closer',
+        x: 1010,
+        y: 662,
+        range: 3,
+        targetId: 'tgt_railway_plate',
+        landmarkId: 'rail_signal_box',
+      },
+    ],
+    landmarks: [
+      { id: 'rail_rails', kind: 'rails', x: 750, y: 300, scale: 2.5 },
+      {
+        id: 'rail_buffer',
+        kind: 'bufferStop',
+        x: 1380,
+        y: 300,
+        name: 'The buffer stop',
+        range: 3,
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'The beam is scraped bright on one face. Something heavy hit it, and not fifty years ago — the exposed metal has barely started to rust.',
+          flag: 'rail_buffer_seen',
+        },
+      },
+      {
+        id: 'rail_signal_box',
+        kind: 'signalBox',
+        x: 1100,
+        y: 540,
+        name: 'The signal box',
+        range: 3.4,
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'The lever frame inside is rusted solid — all but one lever, which has been oiled. Recently. Someone wanted to know which way the points were set.',
+          flag: 'rail_box_seen',
+        },
+      },
+      { id: 'rail_tower', kind: 'waterTower', x: 250, y: 250, name: 'The water tower' },
+      { id: 'rail_sleepers', kind: 'sleeperPile', x: 450, y: 1250, rotation: 0.6 },
+      {
+        id: 'rail_cart',
+        kind: 'wreckedCart',
+        x: 1250,
+        y: 1150,
+        rotation: -0.7,
+        name: 'A wrecked wagon',
+        range: 3,
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'A four-wheel wagon on its side, axles gone. Stencilled on the end plank, half flaked away: LINE 14. There is no line 14.',
+          flag: 'rail_cart_seen',
+        },
+      },
+      { id: 'rail_fence', kind: 'ironFence', x: 750, y: 1450, scale: 2.4 },
+      { id: 'rail_pine_a', kind: 'pine', x: 130, y: 900, scale: 1.1 },
+      { id: 'rail_pine_b', kind: 'pine', x: 1400, y: 820, scale: 1.3 },
+      { id: 'rail_pine_c', kind: 'pine', x: 620, y: 110, scale: 0.9 },
+      { id: 'rail_boulder', kind: 'boulder', x: 300, y: 650, scale: 1.1 },
+    ],
+    caches: [
+      // Bearing 225° from the buffer stop, twelve paces: the second page.
+      { id: 'cache_rail_plumb', targetId: 'tgt_plumb_bob', x: 701, y: 979, depthCm: 19, baseCondition: 80, requiresClue: 'clue_surveyor_2' },
     ],
   },
   {
@@ -145,8 +271,57 @@ export const LOCATIONS: LocationDef[] = [
       { targetId: 'tgt_mechanism_part', weight: 2 },
       { targetId: 'tgt_unknown_artifact', weight: 1.4 },
     ],
+    map: { x: 0.72, y: 0.3 },
     sceneryClues: [
-      { id: 'clue_mine_warning', prompt: 'Look closer', x: 420, y: 1180, range: 3, targetId: 'tgt_mine_warning' },
+      {
+        id: 'clue_mine_warning',
+        prompt: 'Look closer',
+        x: 420,
+        y: 1180,
+        range: 3,
+        targetId: 'tgt_mine_warning',
+        landmarkId: 'mine_frame',
+      },
+    ],
+    landmarks: [
+      { id: 'mine_cliff_n', kind: 'cliffWall', x: 750, y: 40, scale: 2.6 },
+      {
+        id: 'mine_adit',
+        kind: 'tunnelMouth',
+        x: 1150,
+        y: 90,
+        name: 'The adit',
+        range: 3.6,
+        openWhen: { chains: ['chain_sun', 'chain_surveyor'] },
+        notice: {
+          prompt: 'Look closer',
+          text:
+            'Boarded shut, and nailed from the outside. The bottom board has been levered at — the nail heads are bright where a bar bit into them. Somebody wanted in.',
+          flag: 'mine_adit_seen',
+          openText:
+            'The boards are stacked neatly against the rock. Above the mouth, cut into the lintel timber and black with damp: a sun with three rays. Beyond it, the passage goes down.',
+          openFlag: 'mine_adit_open_seen',
+        },
+      },
+      { id: 'mine_headframe', kind: 'headframe', x: 1020, y: 540, rotation: 0.3, name: 'The headframe' },
+      // The pocket: three cliff arms open to the south, around the spot the
+      // surveyor's third page points at. You can see the rock from the
+      // headframe; you cannot walk to the spot in a straight line.
+      { id: 'mine_arm_w', kind: 'cliffWall', x: 180, y: 310, rotation: Math.PI / 2, scale: 0.42 },
+      { id: 'mine_arm_e', kind: 'cliffWall', x: 500, y: 310, rotation: Math.PI / 2, scale: 0.42 },
+      { id: 'mine_arm_n', kind: 'cliffWall', x: 340, y: 180, scale: 0.6 },
+      { id: 'mine_heap_a', kind: 'spoilHeap', x: 300, y: 820, scale: 1.2, name: 'The spoil heap' },
+      { id: 'mine_heap_b', kind: 'spoilHeap', x: 1280, y: 760, scale: 1.0 },
+      { id: 'mine_heap_c', kind: 'spoilHeap', x: 560, y: 1150, scale: 0.9 },
+      { id: 'mine_frame', kind: 'timberFrame', x: 420, y: 1150, rotation: 0.2, name: 'A tunnel support' },
+      { id: 'mine_cart', kind: 'wreckedCart', x: 1100, y: 1050, rotation: 1.1 },
+      { id: 'mine_boulder_a', kind: 'boulder', x: 1380, y: 1320, scale: 1.4 },
+      { id: 'mine_boulder_b', kind: 'boulder', x: 120, y: 1380, scale: 1.0 },
+      { id: 'mine_pine', kind: 'pine', x: 1420, y: 300, scale: 0.8 },
+    ],
+    caches: [
+      // Bearing 290° from the headframe, inside the pocket in the rock.
+      { id: 'cache_mine_book', targetId: 'tgt_field_book', x: 343, y: 294, depthCm: 24, baseCondition: 70, requiresClue: 'clue_surveyor_3' },
     ],
   },
   {
@@ -163,6 +338,7 @@ export const LOCATIONS: LocationDef[] = [
     lockedBy: 'chain_sun',
     lockedHint: 'Deeper than anything you currently have a name for.',
     adventureId: 'adv_sealed_chamber',
+    map: { x: 0.84, y: 0.16 },
     ground: {
       base: '#1a1618',
       mid: '#2a2326',
@@ -188,6 +364,7 @@ export const LOCATIONS: LocationDef[] = [
     lockedBy: 'chain_tablet_bound',
     lockedHint: 'The tablet, whole, pointed toward somewhere walled and overgrown.',
     adventureId: 'adv_courtyard',
+    map: { x: 0.46, y: 0.24 },
     ground: {
       base: '#232a1d',
       mid: '#333e26',
@@ -211,6 +388,7 @@ export const LOCATIONS: LocationDef[] = [
     hardness: 0.5,
     ambience: 'ruins',
     siteId: 'site_silent_court',
+    map: { x: 0.2, y: 0.38 },
     ground: {
       base: '#242820',
       mid: '#343a2c',

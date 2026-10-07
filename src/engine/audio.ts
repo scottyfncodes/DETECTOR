@@ -32,6 +32,12 @@ class AudioEngine {
     return !!this.ctx && this.ctx.state === 'running';
   }
 
+  /** The live context and master bus, for the music layer (engine/music.ts). */
+  graph(): { ctx: AudioContext; master: GainNode; noise: () => AudioBufferSourceNode | null; enabled: boolean } | null {
+    if (!this.ctx || !this.master) return null;
+    return { ctx: this.ctx, master: this.master, noise: () => this.noiseSource(), enabled: this.enabled };
+  }
+
   setEnabled(on: boolean): void {
     this.enabled = on;
     if (this.master) this.master.gain.value = on ? 0.9 : 0;
@@ -218,6 +224,64 @@ class AudioEngine {
   mechanism(): void {
     this.tone(140, 0.18, 0.22, 'square');
     this.grain(0.8, 120, 600, 0.3);
+  }
+
+  /** Stone moving against stone, slowly, for a couple of seconds. Then it stops. */
+  grind(seconds = 2.4): void {
+    if (!this.ctx || !this.master || !this.enabled) return;
+    const t = this.now();
+    const src = this.noiseSource();
+    if (!src) return;
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(420, t);
+    bp.frequency.linearRampToValueAtTime(230, t + seconds);
+    bp.Q.value = 2.6;
+    const trem = this.ctx.createOscillator();
+    trem.frequency.value = 7.5;
+    const tremGain = this.ctx.createGain();
+    tremGain.gain.value = 0.12;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.34, t + 0.25);
+    g.gain.setValueAtTime(0.34, t + seconds - 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + seconds);
+    trem.connect(tremGain).connect(g.gain);
+    src.connect(bp).connect(g).connect(this.master);
+    src.start(t);
+    trem.start(t);
+    src.stop(t + seconds + 0.05);
+    trem.stop(t + seconds + 0.05);
+    // The thud when it seats.
+    this.tone(52, 0.7, 0.3, 'sine', seconds - 0.05);
+    this.grain(0.9, 80, 400, 0.35);
+  }
+
+  /** The held breath before a discovery card: a low swell that never resolves. */
+  swell(seconds = 1.2): void {
+    if (!this.ctx || !this.master || !this.enabled) return;
+    const t = this.now();
+    for (const [f, type, peak] of [
+      [65.4, 'sine', 0.12],
+      [98, 'triangle', 0.05],
+    ] as [number, OscillatorType, number][]) {
+      const osc = this.ctx.createOscillator();
+      osc.type = type;
+      osc.frequency.value = f;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + seconds * 0.8);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + seconds + 0.6);
+      osc.connect(g).connect(this.master);
+      osc.start(t);
+      osc.stop(t + seconds + 0.7);
+    }
+  }
+
+  /** A quiet pencil-on-paper tick for a landmark note. Not a find; a remark. */
+  note(): void {
+    this.grain(0.25, 1800, 4200, 0.07, true);
+    this.tone(1320, 0.09, 0.03, 'triangle', 0.02);
   }
 
   /** Low rumble bed for collapse / escape sequences. */

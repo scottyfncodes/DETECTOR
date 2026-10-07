@@ -90,6 +90,7 @@ button {
      navigation off the bottom of the screen. */
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 0 16px 24px;
 }
@@ -774,4 +775,435 @@ button {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── world: cinematic layer ───────────────────────────────────────────────── */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(70% 60% at 50% 50%, rgba(0, 0, 0, 0) 40%, rgba(4, 5, 4, 0.92) 100%);
+  transition: opacity 0.12s linear;
+  z-index: 1;
+}
+
+.world-ui {
+  z-index: 2;
+}
+
+.chip__near {
+  color: var(--gold);
+  margin-left: 4px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-family: var(--serif);
+  font-size: 12.5px;
+}
+
+.reticle {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(240, 230, 210, 0.4);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  transition: width 0.18s, height 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+.reticle--live {
+  width: 14px;
+  height: 14px;
+  background: rgba(240, 230, 210, 0.08);
+  box-shadow:
+    0 0 0 1.5px rgba(240, 230, 210, 0.95),
+    0 0 12px rgba(217, 164, 65, 0.45);
+}
+
+.reticle--note {
+  box-shadow:
+    0 0 0 1.5px rgba(233, 226, 208, 0.75),
+    0 0 10px rgba(233, 226, 208, 0.25);
+}
+
+.btn--note {
+  background: rgba(10, 13, 11, 0.72);
+  border-color: var(--line-strong);
+  color: var(--text);
+  font-family: var(--serif);
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 15px;
+  backdrop-filter: blur(6px);
+}
+
+/* The surveyor's compass: a heading strip that only exists once it is carried. */
+.compass {
+  position: relative;
+  margin: 8px auto 0;
+  width: min(300px, 76%);
+  height: 46px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(10, 13, 11, 0.58);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  animation: fade 0.5s ease both;
+  --px-per-deg: 2.5px;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.compass--hidden {
+  display: none;
+}
+
+.compass__tape {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.compass__tick {
+  position: absolute;
+  top: 0;
+  left: calc(50% + var(--deg) * var(--px-per-deg));
+  width: 1px;
+  height: 7px;
+  background: rgba(233, 226, 208, 0.35);
+}
+
+.compass__tick--major {
+  height: 10px;
+  background: rgba(233, 226, 208, 0.75);
+}
+
+.compass__tick span {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.compass__needle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1.5px;
+  height: 12px;
+  margin-left: -0.75px;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(217, 164, 65, 0.7);
+}
+
+.compass__heading {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Location title card: fades in, holds, lets go. Never blocks input. */
+.title-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 26%;
+  text-align: center;
+  pointer-events: none;
+  animation: titleCard 3.6s ease both;
+}
+
+.title-card__name {
+  font-family: var(--serif);
+  font-size: 30px;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  text-transform: uppercase;
+  color: #efe6cf;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+}
+
+.title-card__sub {
+  margin-top: 6px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: rgba(233, 226, 208, 0.78);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes titleCard {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.site-intro {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 70% at 50% 40%, rgba(24, 26, 20, 0.9), rgba(6, 7, 6, 0.96));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 26px;
+}
+
+.site-intro p {
+  animation: fade 0.9s ease both;
+}
+
+
+/* ── the survey map ──────────────────────────────────────────────────────── */
+.sheet-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 390 / 400;
+  border-radius: 10px;
+  overflow: visible;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(60, 45, 25, 0.35);
+  background: #d6c69c;
+  margin-top: 4px;
+}
+
+.sheet-map__paper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  display: block;
+}
+
+.sheet-map__link {
+  stroke-dasharray: 6 4;
+  animation: inkIn 1.6s ease both;
+}
+
+@keyframes inkIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  min-width: 44px;
+  min-height: 44px;
+  color: #2d2418;
+  font-family: var(--serif);
+  text-align: center;
+  border-radius: 8px;
+}
+
+.marker:active {
+  background: rgba(60, 45, 25, 0.08);
+}
+
+.marker__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #3a2e1e;
+  box-shadow:
+    0 0 0 3px rgba(214, 198, 156, 0.9),
+    0 0 0 4px #3a2e1e;
+}
+
+.marker--adventure .marker__dot {
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.marker--pull .marker__dot {
+  background: #8a5a1c;
+  box-shadow:
+    0 0 0 3px rgba(214, 198, 156, 0.9),
+    0 0 0 4px #8a5a1c,
+    0 0 16px rgba(138, 90, 28, 0.6);
+  animation: pull 2.4s ease-in-out infinite;
+}
+
+@keyframes pull {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.marker__label {
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(214, 198, 156, 1);
+}
+
+.marker__meta {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6a5540;
+  font-family: var(--sans);
+}
+
+.marker--unknown {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.marker__ring {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px dashed #4a3b2a;
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+.marker--unknown .marker__label {
+  font-size: 14px;
+  color: #4a3b2a;
+}
+
+/* ── discovery tiers ─────────────────────────────────────────────────────── */
+.discovery--minor .discovery__kicker {
+  color: var(--muted);
+}
+
+.discovery__art--small {
+  height: 24vh;
+  min-height: 150px;
+}
+
+.discovery--major {
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(185, 140, 217, 0.18), transparent 70%),
+    var(--bg);
+}
+
+.discovery--event {
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(217, 164, 65, 0.3), transparent 70%),
+    radial-gradient(80% 40% at 50% 100%, rgba(185, 140, 217, 0.14), transparent 70%),
+    #0b0d0a;
+}
+
+.discovery--event .discovery__kicker {
+  letter-spacing: 0.42em;
+  animation: fade 1.2s ease both;
+}
+
+.discovery--event .discovery__art canvas,
+.discovery--major .discovery__art canvas {
+  filter: drop-shadow(0 0 28px rgba(217, 164, 65, 0.35));
+}
+
+.discovery__rays {
+  position: absolute;
+  left: 50%;
+  top: 24vh;
+  width: 140vw;
+  height: 140vw;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(217, 164, 65, 0.07) 0deg 6deg, transparent 6deg 18deg);
+  mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+  animation: rays 40s linear infinite, fade 2s ease both;
+  opacity: 0.9;
+}
+
+@keyframes rays {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.banner--event {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(217, 164, 65, 0.22), rgba(185, 140, 217, 0.08));
+}
+
+.banner--event .banner__kicker {
+  color: var(--gold);
+}
+
+.constellation {
+  display: block;
+  margin: 6px 0 8px;
+}
+
+.constellation__line {
+  stroke: var(--gold);
+  stroke-width: 1.2;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: drawLine 0.9s ease forwards;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.constellation__node {
+  opacity: 0;
+  animation: fade 0.5s ease forwards;
+}
+
+.constellation__node circle {
+  fill: #1a1409;
+  stroke: var(--gold);
+  stroke-width: 1.4;
+}
+
+.constellation__node text {
+  fill: var(--text);
+  font-family: var(--serif);
+  font-size: 10.5px;
 }

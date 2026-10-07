@@ -16,11 +16,11 @@ export const SILENT_COURT: SiteDef = {
   name: 'The Silent Court',
   subtitle: 'Roofless colonnade, no record of use',
   radius: 17,
-  skyTop: '#6b7a52',
-  skyBottom: '#c9b98a',
-  fogColor: '#8a8a6a',
-  fogNear: 9,
-  fogFar: 32,
+  skyTop: '#6f86a3',
+  skyBottom: '#d6c79c',
+  fogColor: '#aeae8c',
+  fogNear: 14,
+  fogFar: 60,
   groundColor: '#3a3f2c',
   groundDetail: '#565c3e',
   ambience: 'ruins',
@@ -45,6 +45,8 @@ export const SILENT_COURT: SiteDef = {
     // Corner columns, broken.
     { id: 'col_break_nw', kind: 'columnBroken', position: { x: -10, y: 0, z: -10 } },
     { id: 'col_break_ne', kind: 'columnBroken', position: { x: 10, y: 0, z: -10 } },
+    // The flagstone the pedestal comes up through, laid flush, easy to miss.
+    { id: 'pedestal_slab', kind: 'stairStep', position: { x: 2.4, y: 0, z: -11.2 }, scale: [0.6, 0.4, 2], solid: false },
     { id: 'col_break_sw', kind: 'columnBroken', position: { x: -10, y: 0, z: 10 } },
     { id: 'col_break_se', kind: 'columnBroken', position: { x: 10, y: 0, z: 10 } },
 
@@ -83,6 +85,21 @@ export const SILENT_COURT: SiteDef = {
         'Boot prints in the dust, and they are not yours. Someone else has been walking this ground — recently.',
       setsFlagOnUse: 'court_seen_footprints',
       hideOnFlag: 'court_seen_footprints',
+    },
+    {
+      // The "someone else was here" seed, finally picked up: the crate holds
+      // their compass and the first page of their field book. The compass is
+      // what turns every bearing already written in the journal into a
+      // direction you can walk.
+      id: 'crate_open',
+      kind: 'pickup',
+      prompt: 'Open the crate',
+      position: { x: 4, y: 0, z: 12.5 },
+      range: 2.4,
+      visual: 'crate',
+      targetId: 'tgt_field_book_1',
+      grantsEquipment: 'tool_compass',
+      setsFlagOnUse: 'court_crate_opened',
     },
     {
       id: 'carving_west',
@@ -141,7 +158,7 @@ export const SILENT_COURT: SiteDef = {
       id: 'relic_pedestal',
       kind: 'pickup',
       prompt: 'Take the idol',
-      position: { x: 0, y: 0, z: -11.5 },
+      position: { x: 2.4, y: 0, z: -11.2 },
       range: 2.4,
       visual: 'relicPedestal',
       requiresFlag: 'court_hand_fitted',

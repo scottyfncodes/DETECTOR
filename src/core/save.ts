@@ -106,6 +106,7 @@ function sanitizeField(v: unknown): FieldState | null {
         baseCondition: num(tr.baseCondition, 100, 0, 100),
         dug: bool(tr.dug, false),
         ...(tr.tutorial === true ? { tutorial: true as const } : {}),
+        ...(typeof tr.cacheId === 'string' && tr.cacheId ? { cacheId: tr.cacheId } : {}),
       };
     })
     .filter((t): t is NonNullable<typeof t> => t !== null);

@@ -30,6 +30,7 @@ export const CLUES: ClueDef[] = [
     title: 'A spur that was never built',
     text:
       'Survey tag, 1888. Bearing 312 degrees, depth 40 fathoms. The spur runs north-west into the old mine ground — and nothing was ever laid there.',
+    pointsTo: 'loc_abandoned_mine',
   },
   {
     id: 'clue_token',
@@ -90,6 +91,7 @@ export const CLUES: ClueDef[] = [
     title: 'The tablet reads a direction',
     text:
       'Whole, the tablet is a small carved map: the woven knot sits at a crossing of two lines, and one line runs on past the edge of the fired clay — toward higher ground, walled and overgrown.',
+    pointsTo: 'loc_courtyard',
   },
   {
     id: 'clue_courtyard',
@@ -98,6 +100,7 @@ export const CLUES: ClueDef[] = [
     title: 'The knot again, and a bearing',
     text:
       'Cut into the courtyard flagstones, worn almost flat: the same woven knot, and beside it, a line pointing down — toward the spoil heaps above the old mine.',
+    pointsTo: 'loc_abandoned_mine',
   },
 
   // ── The Silent Court (content/sites/silentCourt.ts): two matching carvings,
@@ -119,6 +122,49 @@ export const CLUES: ClueDef[] = [
     text:
       'The east wall carries an identical coil — same proportions, same depth of cut, same hand. Two matching marks, on opposite walls of the same small court, do not happen by accident.',
   },
+
+  // ── The Surveyor (content/sites/silentCourt.ts, then every field): the
+  // person whose boot prints are in the court. A dropped crate holds their
+  // compass and the first page of a field book; each page gives a landmark
+  // and a bearing, and the ground at that bearing holds the next page. It
+  // is the game's long thread: it crosses every place, it makes bearings
+  // readable, and it ends where the other two mysteries end.
+  {
+    id: 'clue_surveyor_1',
+    chainId: 'chain_surveyor',
+    symbol: "Surveyor's hand",
+    title: 'Page one: a bench mark',
+    text:
+      'Torn from a field book, pencil, a steady hand: "Bench mark is the dedication stone in the park. From it, bearing 312, ten paces. The old plan says something is set there. Take the compass." The compass was in the crate with it.',
+    pointsTo: 'loc_old_park',
+  },
+  {
+    id: 'clue_surveyor_2',
+    chainId: 'chain_surveyor',
+    symbol: 'Three-pointed sun',
+    title: 'Page two: the sun on the bolt',
+    text:
+      'Inside the tin, a bench-mark bolt with a three-pointed sun stamped into its head, and the second page: "Line 14 was real. They marked it with the sun. Next mark: from the buffer stop at the railway, bearing 225, twelve paces. Listen for brass that is not railway brass."',
+    pointsTo: 'loc_old_railway',
+  },
+  {
+    id: 'clue_surveyor_3',
+    chainId: 'chain_surveyor',
+    symbol: "Surveyor's hand",
+    title: 'Page three: behind the spoil',
+    text:
+      'Wound around the plumb line, the third page. The hand is less steady now: "The spur runs into the mine ground. They boarded the adit. From the headframe, bearing 290 — there is a pocket in the rock the spoil hides. I left the book there in case." In case of what, it does not say.',
+    pointsTo: 'loc_abandoned_mine',
+  },
+  {
+    id: 'clue_surveyor_4',
+    chainId: 'chain_surveyor',
+    symbol: 'Three-pointed sun',
+    title: 'The last page',
+    text:
+      'The field book, whole, in a lead case against the damp. The last entry: "The adit is open again. Whoever opened it stacked the boards neatly. They were here first, and not long ago. The sun is cut into the lintel — the same sun as the bolt. I am going in." There is nothing after that.',
+    pointsTo: 'loc_sealed_chamber',
+  },
 ];
 
 export const CHAINS: MysteryChain[] = [
@@ -131,6 +177,7 @@ export const CHAINS: MysteryChain[] = [
     completeText:
       'A crew badge for a line that was never registered, and a survey tag pointing north-west at forty fathoms. The heading ends at the spoil heaps above the old mine. Somebody was working down there, off the books.',
     unlocksLocation: 'loc_abandoned_mine',
+    links: ['loc_old_railway', 'loc_abandoned_mine'],
   },
   {
     id: 'chain_sun',
@@ -142,6 +189,7 @@ export const CHAINS: MysteryChain[] = [
       'Cast bronze, carved basalt, machined alloy — three materials, three centuries apart, one symbol. The mechanism piece is the proof: there is something built down there, and the collapsed adit behind the spoil heaps is the way in.',
     unlocksLocation: 'loc_sealed_chamber',
     unlocksAdventure: 'adv_sealed_chamber',
+    links: ['loc_abandoned_mine', 'loc_sealed_chamber'],
   },
   {
     id: 'chain_tablet',
@@ -161,6 +209,7 @@ export const CHAINS: MysteryChain[] = [
     completeText:
       'Reassembled, the tablet is small enough to hold in one hand and it is unmistakably a map — this ground, drawn from above, with the woven knot marking one specific spot. Walled. Overgrown. Close.',
     unlocksLocation: 'loc_courtyard',
+    links: ['loc_old_park', 'loc_courtyard'],
   },
   {
     id: 'chain_knot',
@@ -170,6 +219,7 @@ export const CHAINS: MysteryChain[] = [
     completeTitle: 'ONE SYMBOL, THREE SITES',
     completeText:
       'The tablet pointed to the courtyard. The courtyard points to the mine. The same woven knot marks every step — a different mark entirely from the three-pointed sun on the badge and the survey tag, which means two separate mysteries are converging on the same patch of ground.',
+    links: ['loc_courtyard', 'loc_abandoned_mine'],
   },
   {
     id: 'chain_court_coil',
@@ -179,6 +229,18 @@ export const CHAINS: MysteryChain[] = [
     completeTitle: 'BOTH WALLS AGREE',
     completeText:
       'The same coiled serpent, cut into stone on opposite sides of the court, by the same hand, at the same height. Whatever stood at the centre of this place was important enough to mark twice.',
+  },
+  {
+    id: 'chain_surveyor',
+    name: 'The Surveyor',
+    clueIds: ['clue_surveyor_1', 'clue_surveyor_2', 'clue_surveyor_3', 'clue_surveyor_4'],
+    hint: 'Someone was here before you, measuring. Their pages each name a landmark and a bearing.',
+    completeTitle: 'SOMEONE ELSE IS LOOKING',
+    completeText:
+      'The boot prints in the court, the dropped crate, the oiled lever, the scraped buffer stop, the neatly stacked boards. The surveyor was following the three-pointed sun across the same ground you have, and their trail ends at the adit — the same place the badge and the token and the carved stone all point. Whatever is down there, you are not the first to go looking for it. You may be the second.',
+    unlocksLocation: 'loc_sealed_chamber',
+    unlocksAdventure: 'adv_sealed_chamber',
+    links: ['loc_silent_court', 'loc_old_park', 'loc_old_railway', 'loc_abandoned_mine', 'loc_sealed_chamber'],
   },
 ];
 

@@ -172,7 +172,7 @@ export function ExcavateScreen() {
         toolX: drag.down ? drag.pos.x : null,
         toolY: drag.down ? drag.pos.y : null,
         toolRadius: tool.radius,
-        toolKind: tool.kind,
+        toolKind: tool.kind as 'scoop' | 'brush' | 'pick' | 'pinpointer',
         particles: particlesRef.current,
         time: elapsed,
         damageFlash: flashRef.current,
