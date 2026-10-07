@@ -1,24 +1,74 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
-      <stop offset="0" stop-color="#2a2a1a"/>
-      <stop offset="1" stop-color="#0c100e"/>
-    </radialGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f0c766"/>
-      <stop offset="1" stop-color="#b9862f"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2232"/>
+      <stop offset="0.62" stop-color="#4a3a33"/>
+      <stop offset="1" stop-color="#d9934c"/>
     </linearGradient>
+    <linearGradient id="earth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2016"/>
+      <stop offset="1" stop-color="#0c0906"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd9a0" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#f0a85a" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#f0a85a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe7a8" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#e8b24f" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#e8b24f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe29a"/>
+      <stop offset="0.5" stop-color="#e2ad4c"/>
+      <stop offset="1" stop-color="#9c6a22"/>
+    </linearGradient>
+    <linearGradient id="coilTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3f47"/>
+      <stop offset="1" stop-color="#15171b"/>
+    </linearGradient>
+    <clipPath id="under"><rect x="0" y="292" width="512" height="220"/></clipPath>
   </defs>
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <g fill="none" stroke="url(#gold)" stroke-linecap="round">
-    <path d="M256 78 V232" stroke="#e3b553" stroke-width="26"/>
-    <ellipse cx="256" cy="296" rx="118" ry="70" stroke-width="26"/>
+
+  <!-- dusk sky and the sun sitting on the horizon -->
+  <rect width="512" height="300" fill="url(#sky)"/>
+  <circle cx="128" cy="292" r="120" fill="url(#sun)"/>
+  <!-- far ridge -->
+  <path d="M0 268 Q70 248 140 262 T290 256 T420 266 T512 258 V300 H0Z" fill="#2a2420" opacity="0.85"/>
+
+  <!-- the ground, cut away to show what it is keeping -->
+  <rect y="292" width="512" height="220" fill="url(#earth)"/>
+  <path d="M0 292 H512" stroke="#e7a75a" stroke-opacity="0.55" stroke-width="3"/>
+  <g clip-path="url(#under)" fill="none" stroke="#5a4532" stroke-opacity="0.45" stroke-width="2">
+    <path d="M0 340 Q128 330 256 342 T512 336"/>
+    <path d="M0 470 Q140 458 270 472 T512 462"/>
   </g>
-  <g fill="none" stroke="#d9a441" stroke-linecap="round" opacity="0.55">
-    <path d="M150 404 Q256 450 362 404" stroke-width="12"/>
+
+  <!-- the find, and its signal rising to the coil -->
+  <circle cx="250" cy="418" r="96" fill="url(#glow)"/>
+  <g fill="none" stroke="#f2c46a" stroke-linecap="round">
+    <path d="M200 380 Q250 358 300 380" stroke-width="11" stroke-opacity="0.95"/>
+    <path d="M176 346 Q250 314 324 346" stroke-width="9" stroke-opacity="0.65"/>
+    <path d="M156 314 Q250 274 344 314" stroke-width="7" stroke-opacity="0.38"/>
   </g>
-  <g fill="none" stroke="#d9a441" stroke-linecap="round" opacity="0.28">
-    <path d="M112 432 Q256 494 400 432" stroke-width="10"/>
+  <ellipse cx="250" cy="425" rx="38" ry="13" fill="#8a5d1c"/>
+  <ellipse cx="250" cy="418" rx="38" ry="13" fill="url(#gold)"/>
+  <ellipse cx="246" cy="415" rx="16" ry="4.5" fill="#fff1c4" opacity="0.8"/>
+
+  <!-- the detector: shaft, cuff and grip, coil hovering over the ground -->
+  <g stroke-linecap="round" fill="none">
+    <path d="M290 250 L392 94" stroke="#0d0e10" stroke-width="30"/>
+    <path d="M290 250 L392 94" stroke="#c99a46" stroke-width="18"/>
+    <path d="M296 238 L388 98" stroke="#ffe0a0" stroke-width="4" stroke-opacity="0.7"/>
+    <path d="M340 160 L384 188" stroke="#0d0e10" stroke-width="26"/>
+    <path d="M340 160 L384 188" stroke="#3a3330" stroke-width="16"/>
+    <path d="M386 104 Q412 82 430 104" stroke="#0d0e10" stroke-width="24"/>
+    <path d="M386 104 Q412 82 430 104" stroke="#3a3330" stroke-width="14"/>
   </g>
-  <circle cx="256" cy="296" r="14" fill="#f0c766"/>
+  <ellipse cx="250" cy="264" rx="146" ry="44" fill="#0a0a0c"/>
+  <ellipse cx="250" cy="259" rx="141" ry="40" fill="url(#coilTop)"/>
+  <ellipse cx="250" cy="259" rx="141" ry="40" fill="none" stroke="url(#gold)" stroke-width="13"/>
+  <ellipse cx="250" cy="259" rx="84" ry="21" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="4"/>
+  <path d="M126 246 Q250 214 374 246" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
 </svg>
