@@ -78,12 +78,17 @@
     <rect x="292" y="166" width="26" height="16" rx="3" fill="#e9b65a"/>
     <circle cx="330" cy="174" r="5" fill="#c99a46"/>
   </g>
-  <!-- coil -->
-  <ellipse cx="236" cy="297" rx="66" ry="21" fill="#0a0a0c"/>
-  <ellipse cx="236" cy="294" rx="62" ry="18" fill="url(#coilTop)"/>
-  <ellipse cx="236" cy="294" rx="62" ry="18" fill="none" stroke="url(#gold)" stroke-width="9"/>
-  <ellipse cx="236" cy="294" rx="36" ry="9" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="3"/>
-  <path d="M182 288 Q236 272 290 288" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+  <!-- coil: a flat, open-frame DD search coil — a thin loop you can see
+       the ground through, with a spine down its long axis for the yoke -->
+  <g fill="none" stroke-linecap="round">
+    <ellipse cx="236" cy="299" rx="64" ry="15" stroke="#08080a" stroke-width="13"/>
+    <ellipse cx="236" cy="294" rx="64" ry="15" stroke="#1b1d22" stroke-width="12"/>
+    <ellipse cx="236" cy="294" rx="70" ry="20.5" stroke="url(#gold)" stroke-width="3"/>
+    <ellipse cx="236" cy="294" rx="58" ry="9.5" stroke="#e2ad4c" stroke-opacity="0.6" stroke-width="2"/>
+    <path d="M176 294 L296 294" stroke="#08080a" stroke-width="9"/>
+    <path d="M176 293 L296 293" stroke="#1b1d22" stroke-width="6"/>
+    <path d="M182 291 L290 291" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="1.5"/>
+  </g>
   <!-- yoke: the shaft meets the coil at its centre -->
   <path d="M224 292 L232 274 L248 274 L252 292" fill="none" stroke="#0d0e10" stroke-width="10" stroke-linejoin="round"/>
   <path d="M224 292 L232 274 L248 274 L252 292" fill="none" stroke="#c99a46" stroke-width="5" stroke-linejoin="round"/>
