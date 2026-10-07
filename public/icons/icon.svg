@@ -48,9 +48,9 @@
   <!-- the find, and its signal rising to the coil -->
   <circle cx="236" cy="436" r="84" fill="url(#glow)"/>
   <g fill="none" stroke="#f2c46a" stroke-linecap="round">
-    <path d="M196 404 Q236 386 276 404" stroke-width="9" stroke-opacity="0.95"/>
-    <path d="M178 374 Q236 350 294 374" stroke-width="8" stroke-opacity="0.65"/>
-    <path d="M162 344 Q236 314 310 344" stroke-width="6" stroke-opacity="0.4"/>
+    <path d="M194 404 Q236 384 278 404" stroke-width="9" stroke-opacity="0.95"/>
+    <path d="M168 372 Q236 344 304 372" stroke-width="8" stroke-opacity="0.7"/>
+    <path d="M142 340 Q236 304 330 340" stroke-width="7" stroke-opacity="0.5"/>
   </g>
   <ellipse cx="236" cy="443" rx="30" ry="10" fill="#8a5d1c"/>
   <ellipse cx="236" cy="437" rx="30" ry="10" fill="url(#gold)"/>
@@ -79,12 +79,12 @@
     <circle cx="330" cy="174" r="5" fill="#c99a46"/>
   </g>
   <!-- coil -->
-  <ellipse cx="236" cy="298" rx="98" ry="29" fill="#0a0a0c"/>
-  <ellipse cx="236" cy="294" rx="94" ry="26" fill="url(#coilTop)"/>
-  <ellipse cx="236" cy="294" rx="94" ry="26" fill="none" stroke="url(#gold)" stroke-width="10"/>
-  <ellipse cx="236" cy="294" rx="56" ry="13" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="3"/>
-  <path d="M152 286 Q236 264 320 286" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="236" cy="297" rx="66" ry="21" fill="#0a0a0c"/>
+  <ellipse cx="236" cy="294" rx="62" ry="18" fill="url(#coilTop)"/>
+  <ellipse cx="236" cy="294" rx="62" ry="18" fill="none" stroke="url(#gold)" stroke-width="9"/>
+  <ellipse cx="236" cy="294" rx="36" ry="9" fill="#0c0d10" stroke="#e2ad4c" stroke-opacity="0.55" stroke-width="3"/>
+  <path d="M182 288 Q236 272 290 288" fill="none" stroke="#fff1c4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
   <!-- yoke: the shaft meets the coil at its centre -->
-  <path d="M220 292 L232 272 L252 272 L256 292" fill="none" stroke="#0d0e10" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M220 292 L232 272 L252 272 L256 292" fill="none" stroke="#c99a46" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M224 292 L232 274 L248 274 L252 292" fill="none" stroke="#0d0e10" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M224 292 L232 274 L248 274 L252 292" fill="none" stroke="#c99a46" stroke-width="5" stroke-linejoin="round"/>
 </svg>
