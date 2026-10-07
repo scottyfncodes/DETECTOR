@@ -8,8 +8,8 @@
  */
 import type { AdventureStatus, DiscoveryRecord, FieldState, GameStats, SaveData } from './types';
 
-export const SAVE_KEY = 'unearth.save.v1';
-export const BACKUP_KEY = 'unearth.save.rejected';
+export const SAVE_KEY = 'detector.save.v1';
+export const BACKUP_KEY = 'detector.save.rejected';
 export const SAVE_VERSION = 1;
 
 export const DEFAULT_DETECTOR = 'det_starter';
@@ -123,6 +123,7 @@ function sanitizeField(v: unknown): FieldState | null {
     targets,
     playerX: num(r.playerX, 0),
     playerY: num(r.playerY, 0),
+    ...(typeof r.playerYaw === 'number' && Number.isFinite(r.playerYaw) ? { playerYaw: r.playerYaw } : {}),
     holes,
     startedAt: num(r.startedAt, Date.now(), 0),
   };
@@ -232,7 +233,7 @@ let fallbackStore: StorageLike | null = null;
 export function defaultStorage(): StorageLike {
   try {
     if (typeof localStorage !== 'undefined') {
-      const probe = '__unearth_probe__';
+      const probe = '__detector_probe__';
       localStorage.setItem(probe, '1');
       localStorage.removeItem(probe);
       return localStorage;

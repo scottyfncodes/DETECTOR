@@ -29,6 +29,10 @@ const park = getLocation('loc_old_park')!;
 const railway = getLocation('loc_old_railway')!;
 const mine = getLocation('loc_abandoned_mine')!;
 
+function bearingFromLine(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return bearingBetween(a.x, a.y, b.x, b.y);
+}
+
 describe('bearings', () => {
   it('treats yaw as a clockwise compass bearing with north at yaw 0', () => {
     expect(bearingFromYaw(0)).toBe(0);
@@ -66,18 +70,59 @@ describe('bearings', () => {
 });
 
 describe('the surveyor pages tell the truth', () => {
-  it('page one: the park cache is ten paces at bearing 312 from the dedication stone', () => {
-    const stone = park.landmarks!.find((l) => l.id === 'park_stone')!;
-    const cache = park.caches!.find((c) => c.id === 'cache_park_tin')!;
-    expect(bearingBetween(stone.x, stone.y, cache.x, cache.y)).toBeCloseTo(312, 0);
-    expect(Math.hypot(cache.x - stone.x, cache.y - stone.y) / 100).toBeCloseTo(8, 0);
-  });
+  /**
+   * Every page is a cross-bearing, not a pace count: one line from a named
+   * landmark at a written bearing, and one sightline to a second landmark
+   * on a labelled point of the compass. The spot is where they cross. These
+   * check the page text says it, the ground agrees, and the cross actually
+   * pins the spot down (a few steps either way along the line visibly moves
+   * the second landmark off its compass point).
+   */
+  const PAGES = [
+    { clue: 'clue_surveyor_1', loc: park, cache: 'cache_park_tin', from: 'park_stone', bearing: 312, runsAt: 'park_oak', sight: 'park_lamp_a', point: 180, words: [/312/, /dead oak/, /due south/] },
+    { clue: 'clue_surveyor_2', loc: railway, cache: 'cache_rail_plumb', from: 'rail_buffer', bearing: 225, runsAt: 'rail_signal_box', sight: 'rail_tower', point: 315, words: [/225/, /signal box/, /north-west/] },
+    { clue: 'clue_surveyor_3', loc: mine, cache: 'cache_mine_book', from: 'mine_headframe', bearing: 290, runsAt: null, sight: 'mine_heap_a', point: 180, words: [/290/, /spoil heap is due south/] },
+  ] as const;
 
-  it('page two: the railway cache is twelve paces at bearing 225 from the buffer stop', () => {
-    const buffer = railway.landmarks!.find((l) => l.id === 'rail_buffer')!;
-    const cache = railway.caches!.find((c) => c.id === 'cache_rail_plumb')!;
-    expect(bearingBetween(buffer.x, buffer.y, cache.x, cache.y)).toBeCloseTo(225, 0);
-    expect(Math.hypot(cache.x - buffer.x, cache.y - buffer.y) / 100).toBeCloseTo(9.6, 0);
+  for (const page of PAGES) {
+    it(`${page.clue}: the bearing from ${page.from} crosses the sightline to ${page.sight} exactly at the cache`, () => {
+      const text = getClue(page.clue)!.text;
+      for (const w of page.words) expect(text, page.clue).toMatch(w);
+      expect(text, 'pages give sightlines, not pace counts').not.toMatch(/paces/);
+
+      const lm = (id: string) => page.loc.landmarks!.find((l) => l.id === id)!;
+      const from = lm(page.from);
+      const sight = lm(page.sight);
+      const cache = page.loc.caches!.find((c) => c.id === page.cache)!;
+
+      expect(bearingBetween(from.x, from.y, cache.x, cache.y)).toBeCloseTo(page.bearing, 0);
+      if (page.runsAt) {
+        const at = lm(page.runsAt);
+        expect(Math.abs(bearingDelta(bearingFromLine(from, at), page.bearing)), `${page.runsAt} on the line`).toBeLessThan(5);
+      }
+      expect(Math.abs(bearingDelta(bearingBetween(cache.x, cache.y, sight.x, sight.y), page.point))).toBeLessThan(1.5);
+      expect(compassPoint(page.point), 'the sightline is a labelled point on the strip').toMatch(/^(N|NE|E|SE|S|SW|W|NW)$/);
+
+      for (const metres of [-1.6, 1.6]) {
+        const off = pointAtBearing(cache.x, cache.y, page.bearing, metres);
+        expect(Math.abs(bearingDelta(bearingBetween(off.x, off.y, sight.x, sight.y), page.point)), `${metres}m off`).toBeGreaterThan(7);
+      }
+
+      // Nothing solid sits on the spot itself.
+      const colliders = landmarkColliders(page.loc);
+      const wx = cache.x / 100 - page.loc.bounds.w / 200;
+      const wz = cache.y / 100 - page.loc.bounds.h / 200;
+      expect(colliders.some((c) => Math.hypot(c.x - wx, c.z - wz) < c.radius + 0.34)).toBe(false);
+    });
+  }
+
+  it('page three opens the mine by itself: knowing where to stand is reason enough to go', () => {
+    const save = { ...freshSave(), clues: ['clue_surveyor_1', 'clue_surveyor_2'] };
+    expect(save.unlockedLocations).not.toContain('loc_abandoned_mine');
+    const found = resolveObservation(save, { def: getTarget('tgt_plumb_bob')!, locationId: 'loc_old_railway' });
+    expect(found.save.unlockedLocations).toContain('loc_abandoned_mine');
+    expect(found.outcome.unlockedLocations.map((l) => l.id)).toContain('loc_abandoned_mine');
+    expect(discoveryTier(found.outcome)).toBe('event');
   });
 
   it('page three: the mine cache is at bearing 290 from the headframe, inside the rock pocket', () => {
@@ -193,6 +238,15 @@ describe('landmarks', () => {
       expect(loc.map.x).toBeLessThanOrEqual(1);
       expect(loc.map.y).toBeGreaterThanOrEqual(0);
       expect(loc.map.y).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('a fresh arrival faces an authored bearing in every detecting field', () => {
+    for (const loc of LOCATIONS) {
+      if (loc.table.length === 0) continue;
+      expect(loc.arrivalBearing, loc.id).toBeDefined();
+      expect(loc.arrivalBearing!).toBeGreaterThanOrEqual(0);
+      expect(loc.arrivalBearing!).toBeLessThan(360);
     }
   });
 

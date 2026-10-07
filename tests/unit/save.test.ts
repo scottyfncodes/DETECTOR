@@ -87,6 +87,21 @@ describe('save round trip', () => {
     expect(loaded.field?.holes).toHaveLength(1);
   });
 
+  it('remembers which way the player faced, and ignores a facing that is not a number', () => {
+    const storage = memory();
+    const save = freshSave();
+    save.field = { locationId: 'loc_old_park', seed: 1, playerX: 700, playerY: 650, playerYaw: 2.5, holes: [], startedAt: 5, targets: [] };
+    writeSave(save, storage);
+    expect(loadSave(storage).save.field?.playerYaw).toBe(2.5);
+    const bad = sanitize({ ...save, field: { ...save.field, playerYaw: 'north' } });
+    expect(bad.field?.playerYaw).toBeUndefined();
+  });
+
+  it('keeps its own key, apart from anything else served from the same origin', () => {
+    expect(SAVE_KEY).toBe('detector.save.v1');
+    expect(BACKUP_KEY).not.toMatch(/^unearth\./);
+  });
+
   it('persists examined and assembled progress', () => {
     const storage = memory();
     const save = freshSave();

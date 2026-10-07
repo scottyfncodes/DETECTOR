@@ -29,11 +29,11 @@ test.describe('the sealed chamber', () => {
     // Seed before the app boots. Writing it afterwards and reloading does not
     // work: the game flushes its own save on pagehide and would overwrite it.
     await page.addInitScript((save) => {
-      if (!localStorage.getItem('unearth.save.v1')) {
-        localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+      if (!localStorage.getItem('detector.save.v1')) {
+        localStorage.setItem('detector.save.v1', JSON.stringify(save));
       }
     }, SEEDED_SAVE);
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
   });
 
   test('door puzzle, mechanism, escape, artifact', async ({ page }) => {

@@ -3,7 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - claude/unearth-game-build-eftvze
       - main
   workflow_dispatch:
 
@@ -38,6 +37,13 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Single-page fallback: a deep link or a stale path on Pages serves the
+      # game instead of GitHub's 404, and .nojekyll keeps every file served as-is.
+      - name: Pages fallback
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

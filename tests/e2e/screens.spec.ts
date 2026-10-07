@@ -12,7 +12,7 @@ import { approachAndPinpoint, scrubPit } from './helpers';
 const SHOTS = 'test-results/screens';
 
 test('capture every screen', async ({ page }) => {
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.screenshot({ path: `${SHOTS}/01-title.png` });
@@ -32,7 +32,7 @@ test('capture every screen', async ({ page }) => {
   // so the seed below is unconditional (not "only if nothing saved yet") or
   // that auto-write would always win the race and this seed would never land.
   await page.addInitScript((save) => {
-    localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+    localStorage.setItem('detector.save.v1', JSON.stringify(save));
   }, {
       version: 1,
       createdAt: 1,
@@ -45,7 +45,7 @@ test('capture every screen', async ({ page }) => {
       ownedEquipment: ['det_starter', 'tool_scoop', 'tool_brush'],
       money: 0,
       stats: { sweeps: 0, signalsFound: 0, holesDug: 0, emptyHoles: 0, finds: 0, bestCondition: 0 },
-      field: { locationId: 'loc_old_park', seed: 1, targets: [target], playerX: 700, playerY: 1200, holes: [], startedAt: 1 },
+      field: { locationId: 'loc_old_park', seed: 1, targets: [target], playerX: 700, playerY: 1200, playerYaw: 0, holes: [], startedAt: 1 },
       adventures: {},
       settings: { sound: false, haptics: false },
       flags: { seenIntro: true, tutorialFound: false },
@@ -100,9 +100,9 @@ test('capture every screen', async ({ page }) => {
 
 test('capture the adventure', async ({ page }) => {
   await page.addInitScript(() => {
-    if (localStorage.getItem('unearth.save.v1')) return;
+    if (localStorage.getItem('detector.save.v1')) return;
     localStorage.setItem(
-      'unearth.save.v1',
+      'detector.save.v1',
       JSON.stringify({
         version: 1,
         createdAt: 1,
@@ -127,7 +127,7 @@ test('capture the adventure', async ({ page }) => {
       }),
     );
   });
-  await page.goto('/?debug=1');
+  await page.goto('./?debug=1');
 
   await page.getByTestId('location-loc_sealed_chamber').click();
   await page.screenshot({ path: `${SHOTS}/12-adventure-intro.png` });

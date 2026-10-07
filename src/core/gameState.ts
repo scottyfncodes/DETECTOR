@@ -262,11 +262,12 @@ export function recordHole(x: number, y: number, found: boolean): void {
   });
 }
 
-export function savePlayerPosition(x: number, y: number): void {
+export function savePlayerPosition(x: number, y: number, yaw?: number): void {
   patchSaveSilently((save) => {
     if (!save.field) return;
     save.field.playerX = x;
     save.field.playerY = y;
+    if (yaw !== undefined && Number.isFinite(yaw)) save.field.playerYaw = yaw;
   });
 }
 

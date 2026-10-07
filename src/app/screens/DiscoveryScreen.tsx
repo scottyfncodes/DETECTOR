@@ -141,7 +141,8 @@ export function DiscoveryScreen() {
           </div>
           <div>
             <div className="stat__label">Field value</div>
-            <div className="stat__value">{record.value > 0 ? `${record.value} funds` : '—'}</div>
+            {/* A page of someone's field book is not merchandise. */}
+            <div className="stat__value">{def.clueId ? 'Not for sale' : record.value > 0 ? `${record.value} funds` : '—'}</div>
           </div>
         </div>
 

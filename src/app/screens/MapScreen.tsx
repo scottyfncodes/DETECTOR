@@ -74,7 +74,7 @@ export function MapScreen() {
     <div className="screen">
       <TopBar
         title="Field Map"
-        subtitle={findsTotal === 0 ? 'Nothing in the journal yet' : `${findsTotal} ${findsTotal === 1 ? 'find' : 'finds'} in the journal`}
+        subtitle={findsTotal === 0 ? 'Nothing in the journal yet' : 'Pencil for what you suspect, ink for what you know'}
       />
 
       <div className="scroll" style={{ paddingTop: 2 }}>
@@ -169,7 +169,7 @@ export function MapScreen() {
                 <span className="marker__dot" />
                 <span className="marker__label">{loc.name}</span>
                 <span className="marker__meta">
-                  {isAdventure ? (done ? 'revisit' : 'enter') : caches > 0 ? 'a page points here' : findsHere > 0 ? `${findsHere} found` : 'walk in'}
+                  {isAdventure ? (done ? 'revisit' : 'enter') : caches > 0 ? 'a page points here' : findsHere > 0 ? 'searched before' : 'walk in'}
                 </span>
               </button>
             );

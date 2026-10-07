@@ -101,6 +101,13 @@ export function applyDiscoveryRecord(
   const unlocked = [...save.unlockedLocations];
   const adventures = { ...save.adventures };
 
+  // A page that names exactly where to stand opens that ground on its own.
+  if (isNewClue && clue?.opens && !unlocked.includes(clue.opens)) {
+    unlocked.push(clue.opens);
+    const loc = getLocation(clue.opens);
+    if (loc) unlockedLocations.push(loc);
+  }
+
   for (const chain of chains) {
     if (chain.unlocksLocation && !unlocked.includes(chain.unlocksLocation)) {
       unlocked.push(chain.unlocksLocation);

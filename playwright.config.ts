@@ -22,13 +22,14 @@ export default defineConfig({
     hasTouch: true,
     userAgent:
       'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
-    baseURL: 'http://127.0.0.1:4173',
+    // The production base path: the suite plays the build exactly as Pages serves it.
+    baseURL: 'http://127.0.0.1:4173/DETECTOR/',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   webServer: {
     command: 'npm run build && npm run preview',
-    url: 'http://127.0.0.1:4173',
+    url: 'http://127.0.0.1:4173/DETECTOR/',
     reuseExistingServer: true,
     timeout: 180_000,
   },

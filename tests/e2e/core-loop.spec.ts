@@ -40,8 +40,8 @@ test.describe('the core loop on a phone', () => {
     // stomp the save the game itself has since written.
     await page.addInitScript(
       (save) => {
-        if (localStorage.getItem('unearth.save.v1')) return;
-        localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+        if (localStorage.getItem('detector.save.v1')) return;
+        localStorage.setItem('detector.save.v1', JSON.stringify(save));
       },
       seededSave({
         field: {
@@ -50,12 +50,13 @@ test.describe('the core loop on a phone', () => {
           targets: [target],
           playerX: 700,
           playerY: 1200,
+          playerYaw: 0,
           holes: [],
           startedAt: 1,
         },
       }),
     );
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
     await page.getByTestId('location-loc_old_park').click();
     await page.getByTestId('explore-canvas').waitFor();
     await expect(page.getByTestId('hint')).toBeVisible();
@@ -112,8 +113,8 @@ test.describe('the core loop on a phone', () => {
     // the live coil (with no pinpoint mark to fall back on) is nowhere near it.
     await page.addInitScript(
       (save) => {
-        if (localStorage.getItem('unearth.save.v1')) return;
-        localStorage.setItem('unearth.save.v1', JSON.stringify(save));
+        if (localStorage.getItem('detector.save.v1')) return;
+        localStorage.setItem('detector.save.v1', JSON.stringify(save));
       },
       seededSave({
         field: {
@@ -122,12 +123,13 @@ test.describe('the core loop on a phone', () => {
           targets: [{ uid: 't1', targetId: 'tgt_tut_penny', x: 1250, y: 150, depth: 8, baseCondition: 92, dug: false, tutorial: true }],
           playerX: 150,
           playerY: 1250,
+          playerYaw: 0,
           holes: [],
           startedAt: 1,
         },
       }),
     );
-    await page.goto('/?debug=1');
+    await page.goto('./?debug=1');
     await page.getByTestId('location-loc_old_park').click();
     await page.getByTestId('explore-canvas').waitFor();
 

@@ -66,7 +66,7 @@ export function JournalScreen() {
     <div className="screen">
       <TopBar
         title="Field Journal"
-        subtitle={`${save.discoveries.length} ${save.discoveries.length === 1 ? 'find' : 'finds'} · ${save.clues.length} ${save.clues.length === 1 ? 'clue' : 'clues'}`}
+        subtitle={save.clues.length > 0 ? 'What you have found, and what it might mean' : 'What you have found'}
       />
 
       <div className="tabs">
@@ -118,7 +118,7 @@ export function JournalScreen() {
               {grouped.map(([heading, records]) => (
                 <div key={heading}>
                   <div className="group-heading">
-                    {heading} · {records.length}
+                    {heading}
                   </div>
                   {records.map((record) => {
                     const def = getTargetOrPlaceholder(record.targetId);
@@ -244,7 +244,7 @@ function ConnectionsTab({ connections }: { connections: ReturnType<typeof symbol
             <strong className="serif" style={{ fontSize: 17 }}>
               {group.symbol}
             </strong>
-            <span className="label">{group.clues.length} finds</span>
+            <span className="label">Recurring mark</span>
           </div>
           <p className="card__sub" style={{ marginTop: 6 }}>
             This mark shows up on {group.clues.length} separate finds. That is not a coincidence.

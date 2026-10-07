@@ -1,9 +1,9 @@
 {
-  "name": "unearth",
+  "name": "detector",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "UNEARTH — a mobile-first metal detecting and excavation game.",
+  "description": "DETECTOR — a first-person field-discovery game.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
