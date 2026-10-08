@@ -18,7 +18,19 @@ test.describe('mobile shell', () => {
     };
 
     await checkNoOverflow('title');
-    await page.getByRole('button', { name: /begin/i }).click();
+
+    // The opening frame is the field itself, the title fits with margins, and
+    // the one verb sits in the thumb zone.
+    await expect(page.getByTestId('title-world')).toBeVisible();
+    const logo = await page.getByRole('heading', { name: 'DETECTOR' }).boundingBox();
+    expect(logo!.x, 'title clipped on the left').toBeGreaterThanOrEqual(16);
+    expect(logo!.x + logo!.width, 'title clipped on the right').toBeLessThanOrEqual(390 - 16);
+    const cta = await page.getByRole('button', { name: /start sweeping/i }).boundingBox();
+    expect(cta!.y, 'start button is not in the thumb zone').toBeGreaterThan(844 * 0.6);
+    expect(cta!.y + cta!.height, 'start button falls off the screen').toBeLessThanOrEqual(844);
+    expect(cta!.height, 'start button is too short').toBeGreaterThanOrEqual(56);
+    await expect(page.getByTestId('sound-cue')).toBeVisible();
+    await page.getByRole('button', { name: /start sweeping/i }).click();
     await page.getByTestId('explore-canvas').waitFor();
     await checkNoOverflow('detect');
 

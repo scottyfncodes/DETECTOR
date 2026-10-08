@@ -707,42 +707,133 @@ button {
   }
 }
 
-/* ── title ────────────────────────────────────────────────────────────── */
+/* ── title ────────────────────────────────────────────────────────────────
+   The real field fills the frame; the words sit in the sky and the button
+   sits in the thumb zone. The gradient behind the canvas is the same dusk,
+   so nothing jumps while the scene is still being built. */
 .title-screen {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: calc(var(--safe-top) + 56px) 24px calc(var(--safe-bottom) + 28px);
   text-align: center;
+  background: linear-gradient(180deg, #33435a 0%, #8c8670 46%, #4a5b36 54%, #1d2717 100%);
+}
+
+.title-screen__world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.title-screen__world--ready {
+  opacity: 1;
+}
+
+/* Dusk falls at the edges: the sky darkens behind the title, the ground
+   behind the button, the middle stays open for the sweep. */
+.title-screen__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
-    radial-gradient(90% 50% at 50% 42%, rgba(217, 164, 65, 0.12), transparent 70%),
-    linear-gradient(180deg, #0b0f0c, #141a14 60%, #0b0f0c);
+    linear-gradient(180deg, rgba(10, 13, 20, 0.72) 0%, rgba(10, 13, 20, 0.28) 24%, rgba(10, 13, 20, 0) 38%),
+    linear-gradient(0deg, rgba(8, 10, 9, 0.88) 0%, rgba(8, 10, 9, 0.5) 20%, rgba(8, 10, 9, 0) 38%);
+}
+
+.title-screen__head,
+.title-screen__foot {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
 }
 
 .title-screen__logo {
   font-family: var(--serif);
-  font-size: clamp(40px, 15vw, 62px);
-  letter-spacing: 0.2em;
-  margin: 0 0 4px;
-  text-indent: 0.2em;
+  font-weight: 600;
+  /* Eight letters at this tracking fit a 390px phone with margins to spare. */
+  font-size: clamp(32px, 11.5vw, 76px);
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  line-height: 1;
+  margin: 0;
+  color: #f1e8d2;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
 }
 
-.title-screen__rule {
-  width: 60px;
-  height: 1px;
-  background: var(--gold-dim);
-  margin: 14px 0 18px;
-}
-
-.title-screen__tag {
+.title-screen__premise {
   font-family: var(--serif);
   font-style: italic;
-  color: var(--muted);
-  max-width: 300px;
-  margin: 0 0 34px;
+  font-size: clamp(17px, 4.6vw, 21px);
+  line-height: 1.35;
+  color: #efe6cf;
+  max-width: 330px;
+  margin: 16px auto 0;
+  text-wrap: balance;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.75);
+}
+
+.title-sound {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 16px;
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: rgba(233, 226, 208, 0.86);
+  text-align: left;
+}
+
+.title-sound__icon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  color: var(--gold);
+}
+
+/* Each pass over the spot: the headphones answer, in place of the beep. */
+.title-sound--ping .title-sound__icon {
+  animation: titlePing 0.7s ease-out;
+}
+
+@keyframes titlePing {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(242, 196, 106, 0));
+  }
+  25% {
+    transform: scale(1.14);
+    filter: drop-shadow(0 0 8px rgba(242, 196, 106, 0.9));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(242, 196, 106, 0));
+  }
+}
+
+.title-screen__cta {
+  min-height: 64px;
+  font-size: 17px;
+  letter-spacing: 0.14em;
+  border-radius: 18px;
+}
+
+.title-screen__resume {
+  margin: 12px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: rgba(233, 226, 208, 0.78);
 }
 
 .tiny {

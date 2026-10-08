@@ -207,6 +207,6 @@ export async function startNewGame(page: Page): Promise<void> {
   await page.goto('./?debug=1');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.getByRole('button', { name: /begin/i }).click();
+  await page.getByRole('button', { name: /start sweeping/i }).click();
   await page.getByTestId('explore-canvas').waitFor();
 }

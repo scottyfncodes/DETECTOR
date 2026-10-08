@@ -106,8 +106,13 @@ npm run measure    # prints excavation timing/damage balance figures
 ```
 
 Everything is rendered at runtime — no image or audio assets. Three.js is
-lazy-loaded, so a player who never walks past the map pays nothing for it; the
-main bundle is about 110 kB gzipped.
+lazy-loaded, so the map, journal and kit never pay for it; the main bundle is
+about 125 kB gzipped. The title screen pulls it in behind its own dusk
+gradient: the opening frame is the real Old Park, built by the same
+`buildFieldScene` the game walks, with the detector sweeping and a ring
+pulsing off the coil each time it passes something
+(`engine/scene3d/titleView.ts`). Sound waits for the tap that starts the game;
+reduced motion gets one still frame.
 
 ## How it plays
 
